@@ -1,0 +1,106 @@
+/* some default styles to make the view more native like */
+
+html {
+  box-sizing: border-box;
+  background: transparent;
+
+  /* Prevent the page to be scrollable */
+  overflow: hidden;
+
+  /* Force the default cursor, even on text */
+  cursor: default;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+  margin: 0;
+  padding: 0;
+  position: relative;
+
+  /* Prevent the content from being selectionable */
+  -webkit-user-select: none;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+input, textarea {
+  -webkit-user-select: auto;
+  user-select: auto;
+}
+
+#main-container {
+  border: 1px solid red;
+}
+
+#login-main-content-left-container {
+  position: relative;
+}
+
+#login-main-content-container {
+  height: 70vh;
+  background-color: white;
+}
+
+.email-password-input {
+  width: 100%;
+  height: 23px;
+  border: 1px solid purple;
+  padding: 3px 0 0 3px;
+}
+
+#login-main-content-right-container {
+  border: 1px solid cyan;
+  padding-top: 55px;
+  padding-left: 27px;
+}
+
+#logo-container {
+  margin: 40% auto;
+  border: 1px solid cyan;
+  padding-left: 25px;
+}
+
+.flex-parent {
+  display: flex;
+}
+
+.input-container {
+  border: 1px solid blue;
+  margin-bottom: 5px;
+  display: inline-block;
+  width: 75%;
+}
+
+.bold-title-text {
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.grey-description-text {
+  color: grey;
+  padding: 5px 0;
+  font-size: 13px;
+  margin-bottom: 3px;
+}
+
+.flex-2 {
+  flex: 2;
+}
+
+.flex-3 {
+  flex: 3;
+  border: 1px solid blue;
+}
+
+#login-bottom-container {
+  background-color: #f0f0f2;
+  height: 20vh;
+  position: relative;
+}
+
+#sign-up-button {
+  position: absolute;
+  top: 40%;
+  left: 15%;
+  padding: 5px 24px;
+}

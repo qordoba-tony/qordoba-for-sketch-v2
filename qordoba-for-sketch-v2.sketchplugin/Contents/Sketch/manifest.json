@@ -1,0 +1,31 @@
+{
+  "compatibleVersion": 3,
+  "bundleVersion": 1,
+  "commands": [
+    {
+      "name": "my-commandd",
+      "identifier": "my-command-identifier",
+      "script": "my-command.js",
+      "shortcut": "cmd alt 2"
+    },
+    {
+      "name": "Login / Logout",
+      "identifier": "login",
+      "shortcut": "cmd alt 1",
+      "script": "authenticate.js"
+    }
+  ],
+  "menu": {
+    "title": "qordoba-for-sketch-v2",
+    "items": [
+      "my-command-identifier",
+      "login"
+    ]
+  },
+  "version": "0.1.0",
+  "name": "qordoba-for-sketch-v2",
+  "disableCocoaScriptPreprocessor": true,
+  "appcast": "https://raw.githubusercontent.com//master/.appcast.xml",
+  "author": "tonyn4444",
+  "authorEmail": "tntuyen@ucdavis.edu"
+}

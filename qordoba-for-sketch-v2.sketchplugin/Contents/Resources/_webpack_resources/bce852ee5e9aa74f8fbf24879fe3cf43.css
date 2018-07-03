@@ -1,0 +1,74 @@
+/* some default styles to make the view more native like */
+
+html {
+  box-sizing: border-box;
+  background: transparent;
+
+  /* Prevent the page to be scrollable */
+  overflow: hidden;
+
+  /* Force the default cursor, even on text */
+  cursor: default;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+  margin: 0;
+  padding: 0;
+  position: relative;
+
+  /* Prevent the content from being selectionable */
+  -webkit-user-select: none;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+input, textarea {
+  -webkit-user-select: auto;
+  user-select: auto;
+  border: 1px solid red;
+}
+
+#main-container {
+  border: 1px solid red;
+}
+
+#login-main-content-left-container {
+  position: relative;
+}
+
+#login-main-content-container {
+  height: 70vh;
+  background-color: white;
+}
+
+#logo-container {
+  margin: 35% auto;
+  border: 1px solid cyan;
+  padding-left: 25px;
+}
+
+.flex-parent {
+  display: flex;
+}
+
+.flex-2 {
+  flex: 2;
+}
+
+.flex-3 {
+  flex: 3;
+  border: 1px solid blue;
+}
+
+#login-bottom-container {
+  background-color: #f0f0f2;
+  height: 30vh;
+  position: relative;
+}
+
+#sign-up-button {
+  position: absolute;
+  top: 40%;
+  left: 15%;
+}
