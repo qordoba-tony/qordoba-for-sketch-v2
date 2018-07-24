@@ -13,6 +13,11 @@
       "identifier": "login",
       "shortcut": "cmd alt 1",
       "script": "authenticate.js"
+    },
+    {
+      "name": "Test Cocoascript",
+      "identifier": "cocoascript",
+      "script": "script.cocoascript"
     }
   ],
   "menu": {
