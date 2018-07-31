@@ -2,10 +2,13 @@ import BrowserWindow from 'sketch-module-web-view';
 import fetch from 'sketch-polyfill-fetch';
 import qordobaSDK from './api';
 import Rollbar from 'rollbar';
+import sketch from 'sketch';
 
 const UI = require('sketch/ui');
 
+
 export default function(context) {
+  const token = sketch.Settings.settingForKey('token');
 
   const options = {
     identifier: 'unique.id',
@@ -31,10 +34,7 @@ export default function(context) {
   // print a message when the page loads
   webContents.on('did-finish-load', () => {
     // UI.message('UI loadeddd!' + '...')
-    console.log('executing JavaScript instantiateRollbarHandler');
     webContents.executeJavaScript('instantiateRollbarHandler()');
-    console.log('invoking qordobaSDK.common.init');
-    qordobaSDK.common.init();
   })
 
   // add a handler for a call from web content's javascript
@@ -43,8 +43,8 @@ export default function(context) {
     fetch('https://app.qordoba.com/api/login', {
       method: 'PUT',
       body: JSON.stringify({
-        username: 'ethan@qordoba.com',
-        password: 'Qpassfrontend25'
+        username: username,
+        password: password
       }),
       headers: {
         'Content-Type': 'application/json',
@@ -52,12 +52,20 @@ export default function(context) {
       }
     })
      .then((res) => {
-       res.json().then(data => qordobaSDK.common.setUserInfo(data));
+       res.json().then(data => {
+        qordobaSDK.common.setUserInfo(data);
+        browserWindow.close();
+      });
      })
      .catch(error => {
       console.log('error', error);
      })
   });
+
+  webContents.on('logout', () => {
+    sketch.Settings.setSettingForKey('token', null);
+    browserWindow.close();
+  })
 
   webContents.on('debugger', s => {
     console.log('debugger', s);
@@ -72,11 +80,10 @@ export default function(context) {
   });
 
   webContents.on('instantiateRollbar', () => {
-    console.log('invoking instantiateRollbarHandler');
     webContents.executeJavaScript('instantiateRollbarHandler()');
   })
 
-  if (qordobaSDK.common.token) {
+  if (token) {
     browserWindow.loadURL(require('../resources/logged-in-user-view.html'));
   } else {
     browserWindow.loadURL(require('../resources/webview.html'))

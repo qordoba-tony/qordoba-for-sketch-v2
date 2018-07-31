@@ -82,54 +82,9 @@ document.addEventListener("contextmenu", function (e) {
   e.preventDefault();
 });
 
-document.getElementById('login-button').addEventListener('click', function () {
-  // pluginCall('login', 'Logging in!!!!', 'ethan@qordoba.com', 'Qpassfrontend25');
-  var userEmailInput = document.querySelector('#user-email-input');
-  var userPasswordInput = document.querySelector('#user-password-input');
-  var emailValue = userEmailInput.value;
-  var passwordValue = userPasswordInput.value;
-  (0, _client2['default'])('login', 'Logging in as ' + String(emailValue) + '!!', emailValue, passwordValue);
-  (0, _client2['default'])('debugger', emailValue);
-  (0, _client2['default'])('debugger', passwordValue);
+document.getElementById('logout-button').addEventListener('click', function () {
+  (0, _client2['default'])('logout');
 });
-
-// document.getElementById('sign-up-button').addEventListener('click', () => {
-// 	pluginCall('nativeLog', 'Signing up!');
-// });
-
-window.redirectToSignup = function (browserWindow) {
-  browserWindow.loadURL('https://qordoba.com/sketch-professional');
-};
-
-// called from the plugin
-window.setRandomNumber = function (randomNumber) {
-  document.getElementById('answer').innerHTML = 'Random number from the plugin: ' + randomNumber;
-};
-
-// window.setWindowIntoState
-
-window.instantiateRollbarHandler = function () {
-  (0, _client2['default'])('nativeLog', 'invoking instantiateRollbar!');
-
-  // const _rollbarConfig = {
-  //      accessToken: "ee1a00df09e140fca8f560d78aec5700",
-  //      captureUncaught: true,
-  //      captureUnhandledRejections: true,
-  //      payload: {
-  //          environment: "development"
-  //      }
-  //    };
-  //    const rollbar = new Rollbar(_rollbarConfig);
-};
-
-// window.handleLoginAPICall = function (username, password, axios) {
-// 	pluginCall('nativeLog', 'NATIVE LOG/debugger/axios.../JSON.axiosResponse');
-// 	pluginCall('debugger', axios);
-// 	axios.get('https://app.qordoba.com/api/login', {username, password})
-// 		.then((res) => {
-// 			pluginCall('debugger', JSON.stringify(res));
-// 		});
-// }
 
 /***/ }),
 /* 1 */

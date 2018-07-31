@@ -1,4 +1,5 @@
 import Rollbar from 'rollbar';
+import sketch from 'sketch';
 
 const qordobaSDK = qordobaSDK || {};
 
@@ -16,16 +17,14 @@ qordobaSDK.common = {
     token: false,
     testString: 'test',
     init: function() {
-        console.log('qordobaSDK.common.init invoked!');
     },
     setUserInfo: function(userInfo) {
-        console.log('setUserInfo invoked!', JSON.stringify(userInfo));
         this.token = userInfo.token;
-        this.userInfo = userInfo;
-        console.log('this', JSON.stringify(this));
+        sketch.Settings.setSettingForKey('token', userInfo.token);
+
+        // this.userInfo = userInfo;
     },
     setRollbarIntoStateHandler: function(rollbar) {
-        console.log('setRollbarIntoStateHandler invoked', JSON.stringify(rollbar));
     }
 }
 

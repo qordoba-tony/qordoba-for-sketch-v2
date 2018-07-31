@@ -7,7 +7,14 @@ document.addEventListener("contextmenu", function(e) {
 });
 
 document.getElementById('login-button').addEventListener('click', function () {
-  pluginCall('login', 'Logging in!!!!', 'ethan@qordoba.com', 'Qpassfrontend25');
+  // pluginCall('login', 'Logging in!!!!', 'ethan@qordoba.com', 'Qpassfrontend25');
+  const userEmailInput = document.querySelector('#user-email-input');
+  const userPasswordInput = document.querySelector('#user-password-input');
+  const emailValue = userEmailInput.value;
+  const passwordValue = userPasswordInput.value;
+  pluginCall('login', `Logging in as ${emailValue}!!`, emailValue, passwordValue);
+  pluginCall('debugger', emailValue);
+  pluginCall('debugger', passwordValue);
 });
 
 // document.getElementById('sign-up-button').addEventListener('click', () => {
@@ -28,15 +35,15 @@ window.setRandomNumber = function (randomNumber) {
 window.instantiateRollbarHandler = function () {
 	pluginCall('nativeLog', 'invoking instantiateRollbar!');
 
-	const _rollbarConfig = {
-      accessToken: "ee1a00df09e140fca8f560d78aec5700",
-      captureUncaught: true,
-      captureUnhandledRejections: true,
-      payload: {
-          environment: "development"
-      }
-    };
-    const rollbar = new Rollbar(_rollbarConfig);
+	// const _rollbarConfig = {
+ //      accessToken: "ee1a00df09e140fca8f560d78aec5700",
+ //      captureUncaught: true,
+ //      captureUnhandledRejections: true,
+ //      payload: {
+ //          environment: "development"
+ //      }
+ //    };
+ //    const rollbar = new Rollbar(_rollbarConfig);
 
 }
 
