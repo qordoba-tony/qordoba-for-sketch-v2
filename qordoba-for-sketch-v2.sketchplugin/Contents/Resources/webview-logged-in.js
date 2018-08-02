@@ -77,6 +77,8 @@ var _rollbar2 = _interopRequireDefault(_rollbar);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
+var rollbar = void 0;
+
 // Disable the context menu to have a more native feel
 document.addEventListener("contextmenu", function (e) {
   e.preventDefault();
@@ -84,7 +86,23 @@ document.addEventListener("contextmenu", function (e) {
 
 document.getElementById('logout-button').addEventListener('click', function () {
   (0, _client2['default'])('logout');
+  rollbar.info('Logging out!');
 });
+
+window.instantiateRollbarHandler = function () {
+  (0, _client2['default'])('nativeLog', 'invoking instantiateRollbar!');
+
+  var _rollbarConfig = {
+    accessToken: "ee1a00df09e140fca8f560d78aec5700",
+    captureUncaught: true,
+    captureUnhandledRejections: true,
+    payload: {
+      environment: "development"
+    }
+  };
+  rollbar = new _rollbar2['default'](_rollbarConfig);
+  rollbar.info('Rollbar initialized in webview-logged-in.js file!');
+};
 
 /***/ }),
 /* 1 */

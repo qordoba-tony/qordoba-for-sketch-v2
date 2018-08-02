@@ -5,9 +5,24 @@ import Rollbar from 'rollbar';
 import sketch from 'sketch';
 
 const UI = require('sketch/ui');
+console.log('loading authenticate.js');
 
+function setUserInfo (userInfo) {
+    console.log('setUserInfo invoked from authenticate.js!!!!!');
+    const token = userInfo.token;
+    const loggedUser = userInfo.loggedUser;
+    const username = userInfo.loggedUser.name;
+    const organizations = userInfo.loggedUser.organizations;
+
+    sketch.Settings.setSettingForKey('loggedUser', loggedUser);
+    sketch.Settings.setSettingForKey('organizations', organizations);
+    sketch.Settings.setSettingForKey('token', userInfo.token);
+    sketch.Settings.setSettingForKey('username', username);
+    // fetchProjects();
+  }
 
 export default function(context) {
+  
   const token = sketch.Settings.settingForKey('token');
 
   const options = {
@@ -16,11 +31,6 @@ export default function(context) {
     height: 350,
     show: false
   }
-
-  
-  //   // this.rollbar = rollbar;
-  //   console.log('ROLLBAR', rollbar);
-  // console.log('test log', rollbar);
 
   var browserWindow = new BrowserWindow(options)
 
@@ -51,15 +61,19 @@ export default function(context) {
         'User-Agent': 'sketch'
       }
     })
-     .then((res) => {
-       res.json().then(data => {
-        qordobaSDK.common.setUserInfo(data);
-        browserWindow.close();
-      });
-     })
-     .catch(error => {
-      console.log('error', error);
-     })
+      .then((res) => {
+        console.log('res', JSON.stringify(res));
+        if (res.status === 200) {
+          res.json().then(data => {
+            setUserInfo(data);
+            const name = data.loggedUser.name;
+            webContents.executeJavaScript(`logInfoToRollbar("${name}", "Login successful")`);
+            browserWindow.close();
+          });
+        } else {
+          webContents.executeJavaScript(`logErrorToRollbar("${username}", "Login unsuccessful")`);
+        }
+      })
   });
 
   webContents.on('logout', () => {

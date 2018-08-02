@@ -752,8 +752,6 @@ exports['default'] = function (context) {
     var orgId = String(_sketch2['default'].Settings.settingForKey('organizations')[0].id);
     var token = _sketch2['default'].Settings.settingForKey('token');
     var fetchProjectsURL = 'https://app.qordoba.com/api/organizations/' + String(orgId) + '/projects/by_type/7';
-    console.log(fetchProjectsURL);
-    console.log('token', token);
     fetch(fetchProjectsURL, {
       method: 'GET',
       headers: {

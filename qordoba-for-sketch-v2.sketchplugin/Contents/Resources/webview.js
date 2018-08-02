@@ -77,6 +77,8 @@ var _rollbar2 = _interopRequireDefault(_rollbar);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
+var rollbar = void 0;
+
 // Disable the context menu to have a more native feel
 document.addEventListener("contextmenu", function (e) {
   e.preventDefault();
@@ -89,8 +91,9 @@ document.getElementById('login-button').addEventListener('click', function () {
   var emailValue = userEmailInput.value;
   var passwordValue = userPasswordInput.value;
   (0, _client2['default'])('login', 'Logging in as ' + String(emailValue) + '!!', emailValue, passwordValue);
-  (0, _client2['default'])('debugger', emailValue);
-  (0, _client2['default'])('debugger', passwordValue);
+  // pluginCall('debugger', emailValue);
+  // pluginCall('debugger', passwordValue);
+  rollbar.info(String(emailValue) + ' attempting to log in.');
 });
 
 // document.getElementById('sign-up-button').addEventListener('click', () => {
@@ -106,20 +109,31 @@ window.setRandomNumber = function (randomNumber) {
   document.getElementById('answer').innerHTML = 'Random number from the plugin: ' + randomNumber;
 };
 
+window.logInfoToRollbar = function (user, message) {
+  // pluginCall('debugger', message);
+  // pluginCall('debugger', user);
+  rollbar.info(String(user) + ': ' + String(message));
+};
+
+window.logErrorToRollbar = function (user, message) {
+  rollbar.error(String(user) + ': ' + String(message));
+};
+
 // window.setWindowIntoState
 
 window.instantiateRollbarHandler = function () {
   (0, _client2['default'])('nativeLog', 'invoking instantiateRollbar!');
 
-  // const _rollbarConfig = {
-  //      accessToken: "ee1a00df09e140fca8f560d78aec5700",
-  //      captureUncaught: true,
-  //      captureUnhandledRejections: true,
-  //      payload: {
-  //          environment: "development"
-  //      }
-  //    };
-  //    const rollbar = new Rollbar(_rollbarConfig);
+  var _rollbarConfig = {
+    accessToken: "ee1a00df09e140fca8f560d78aec5700",
+    captureUncaught: true,
+    captureUnhandledRejections: true,
+    payload: {
+      environment: "development"
+    }
+  };
+  rollbar = new _rollbar2['default'](_rollbarConfig);
+  rollbar.info('Rollbar initialized in webview.js file!');
 };
 
 // window.handleLoginAPICall = function (username, password, axios) {
