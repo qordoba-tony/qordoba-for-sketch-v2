@@ -747,30 +747,6 @@ module.exports = EventEmitter
 
 exports['default'] = function (context) {
 
-  function fetchProjects() {
-    console.log('fetchProjects invoked!');
-    var orgId = String(_sketch2['default'].Settings.settingForKey('organizations')[0].id);
-    var token = _sketch2['default'].Settings.settingForKey('token');
-    var fetchProjectsURL = 'https://app.qordoba.com/api/organizations/' + String(orgId) + '/projects/by_type/7';
-    fetch(fetchProjectsURL, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'sketch',
-        'X-AUTH-TOKEN': token
-      }
-
-    }).then(function (response) {
-      response.json().then(function (data) {
-        console.log('data', JSON.stringify(data));
-        var projects = data.projects;
-        console.log('projects', JSON.stringify(projects));
-      });
-    })['catch'](function (error) {
-      console.log('fetchProjects failed', error);
-    });
-  }
-
   var options = {
     identifier: 'unique.id',
     width: 600,
@@ -823,6 +799,33 @@ var _sketch2 = _interopRequireDefault(_sketch);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 var UI = __webpack_require__(26);
+console.log('loading upload-page.js!');
+
+function fetchProjects() {
+  console.log('fetchProjects invoked!');
+  var orgId = String(_sketch2['default'].Settings.settingForKey('organizations')[0].id);
+  var token = _sketch2['default'].Settings.settingForKey('token');
+  var fetchProjectsURL = 'https://app.qordoba.com/api/organizations/' + String(orgId) + '/projects/by_type/7';
+  fetch(fetchProjectsURL, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'User-Agent': 'sketch',
+      'X-AUTH-TOKEN': token
+    }
+  }).then(function (response) {
+    console.log('response', JSON.stringify(response));
+    if (response.status === 200) {
+      response.json().then(function (data) {
+        console.log('data', JSON.stringify(data));
+        var projects = data.projects;
+        console.log('projects', JSON.stringify(projects));
+      });
+    } else {
+      console.log('fetchProjects failed');
+    }
+  });
+}
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(12)))
 
 /***/ }),

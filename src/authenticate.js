@@ -43,8 +43,7 @@ export default function(context) {
 
   // print a message when the page loads
   webContents.on('did-finish-load', () => {
-    // UI.message('UI loadeddd!' + '...')
-    webContents.executeJavaScript('instantiateRollbarHandler()');
+    // UI.message('UI loaded!' + '...')
   })
 
   // add a handler for a call from web content's javascript
@@ -85,17 +84,9 @@ export default function(context) {
     console.log('debugger', s);
   });
 
-  webContents.on('setRollbarIntoState', rollbarInstance => {
-    qordobaSDK.common.setRollbarIntoStateHandler(rollbarInstance);
-  });
-
   webContents.on('nativeLog', s => {
     UI.message(s);
   });
-
-  webContents.on('instantiateRollbar', () => {
-    webContents.executeJavaScript('instantiateRollbarHandler()');
-  })
 
   if (token) {
     browserWindow.loadURL(require('../resources/logged-in-user-view.html'));

@@ -3,6 +3,17 @@ import Rollbar from 'rollbar';
 
 let rollbar;
 
+const _rollbarConfig = {
+  accessToken: "ee1a00df09e140fca8f560d78aec5700",
+  captureUncaught: true,
+  captureUnhandledRejections: true,
+  payload: {
+      environment: "development"
+  }
+};
+rollbar = new Rollbar(_rollbarConfig);
+rollbar.info('Rollbar initialized in webview.js file!');
+
 // Disable the context menu to have a more native feel
 document.addEventListener("contextmenu", function(e) {
   e.preventDefault();
@@ -42,30 +53,4 @@ window.logInfoToRollbar = function (user, message) {
 window.logErrorToRollbar = function (user, message) {
   rollbar.error(`${user}: ${message}`);
 }
-
-// window.setWindowIntoState
-
-window.instantiateRollbarHandler = function () {
-	pluginCall('nativeLog', 'invoking instantiateRollbar!');
-
-	const _rollbarConfig = {
-      accessToken: "ee1a00df09e140fca8f560d78aec5700",
-      captureUncaught: true,
-      captureUnhandledRejections: true,
-      payload: {
-          environment: "development"
-      }
-    };
-    rollbar = new Rollbar(_rollbarConfig);
-    rollbar.info('Rollbar initialized in webview.js file!');
-}
-
-// window.handleLoginAPICall = function (username, password, axios) {
-// 	pluginCall('nativeLog', 'NATIVE LOG/debugger/axios.../JSON.axiosResponse');
-// 	pluginCall('debugger', axios);
-// 	axios.get('https://app.qordoba.com/api/login', {username, password})
-// 		.then((res) => {
-// 			pluginCall('debugger', JSON.stringify(res));
-// 		});
-// }
 

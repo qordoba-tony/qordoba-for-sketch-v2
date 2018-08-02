@@ -1,35 +1,37 @@
 import BrowserWindow from 'sketch-module-web-view'
 import sketch from 'sketch';
 const UI = require('sketch/ui')
+console.log('loading upload-page.js!');
+
+function fetchProjects() {
+  console.log('fetchProjects invoked!');
+  const orgId = String(sketch.Settings.settingForKey('organizations')[0].id);
+  const token = sketch.Settings.settingForKey('token');
+  const fetchProjectsURL = `https://app.qordoba.com/api/organizations/${orgId}/projects/by_type/7`;
+  fetch(fetchProjectsURL, {
+    method: 'GET',
+    headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'sketch',
+        'X-AUTH-TOKEN': token
+    }
+  })
+    .then(response => {
+      console.log('response', JSON.stringify(response));
+      if (response.status === 200) {
+        response.json()
+          .then(data => {
+            console.log('data', JSON.stringify(data));
+            const projects = data.projects;
+            console.log('projects', JSON.stringify(projects));
+          })
+      } else {
+        console.log('fetchProjects failed');
+      }
+    })
+}
 
 export default function(context) {
-
-  function fetchProjects() {
-    console.log('fetchProjects invoked!');
-    const orgId = String(sketch.Settings.settingForKey('organizations')[0].id);
-    const token = sketch.Settings.settingForKey('token');
-    const fetchProjectsURL = `https://app.qordoba.com/api/organizations/${orgId}/projects/by_type/7`;
-    fetch(fetchProjectsURL, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': 'sketch',
-            'X-AUTH-TOKEN': token
-        }
-
-    })
-        .then(response => {
-            response.json()
-              .then(data => {
-                console.log('data', JSON.stringify(data));
-                const projects = data.projects;
-                console.log('projects', JSON.stringify(projects));
-              })
-        })
-        .catch(error => {
-            console.log('fetchProjects failed', error);
-        })
-}
 
   const options = {
     identifier: 'unique.id',

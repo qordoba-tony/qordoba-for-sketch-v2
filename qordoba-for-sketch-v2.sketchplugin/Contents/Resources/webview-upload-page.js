@@ -77,18 +77,28 @@ var _rollbar2 = _interopRequireDefault(_rollbar);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
+var _rollbarConfig = {
+  accessToken: "ee1a00df09e140fca8f560d78aec5700",
+  captureUncaught: true,
+  captureUnhandledRejections: true,
+  payload: {
+    environment: "development"
+  }
+};
+var rollbar = new _rollbar2['default'](_rollbarConfig);
+
 // Disable the context menu to have a more native feel
 document.addEventListener("contextmenu", function (e) {
-	e.preventDefault();
+  e.preventDefault();
 });
 
 window.addOrganizations = function (orgName) {
-	document.querySelector('#selected-org').innerText = orgName;
-	(0, _client2['default'])('debugger', orgName);
+  document.querySelector('#selected-org').innerText = orgName;
+  (0, _client2['default'])('debugger', orgName);
 };
 
 window.setTimeout(function () {
-	(0, _client2['default'])('addOrganizations');
+  (0, _client2['default'])('addOrganizations');
 }, 3000);
 
 /***/ }),
