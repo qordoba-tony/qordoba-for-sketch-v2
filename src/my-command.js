@@ -30,5 +30,9 @@ export default function(context) {
     webContents.executeJavaScript(`setRandomNumber(${Math.random()})`)
   })
 
+  webContents.on('debugger', s => {
+    console.log('debugger', s);
+  });
+
   browserWindow.loadURL(require('../resources/webview.html'))
 }

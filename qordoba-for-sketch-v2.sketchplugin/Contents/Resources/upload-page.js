@@ -67,7 +67,7 @@
 /* 0 */
 /***/ (function(module, exports) {
 
-throw new Error("Module build failed: Error: ENOENT: no such file or directory, open '/Users/tonynguyen/qordoba/qordoba-for-sketch-v2/resources/logged-in.js'");
+throw new Error("Module build failed: Error: ENOENT: no such file or directory, open '/Users/tonynguyen/qordoba/qordoba-for-sketch-v2/resources/upload-page.js'");
 
 /***/ })
 /******/ ]);

@@ -105,6 +105,4 @@ input, textarea {
 #organizations-dropdown {
   position: absolute;
   border: 1px solid blue;
-  display: none;
 }
-

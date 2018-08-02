@@ -19,13 +19,44 @@ qordobaSDK.common = {
     init: function() {
     },
     setUserInfo: function(userInfo) {
-        this.token = userInfo.token;
-        sketch.Settings.setSettingForKey('token', userInfo.token);
+        const token = userInfo.token;
+        const loggedUser = userInfo.loggedUser;
+        const organizations = userInfo.loggedUser.organizations;
 
-        // this.userInfo = userInfo;
+        sketch.Settings.setSettingForKey('loggedUser', loggedUser);
+        sketch.Settings.setSettingForKey('organizations', organizations);
+        sketch.Settings.setSettingForKey('token', userInfo.token);
+        fetchProjects();
+
     },
     setRollbarIntoStateHandler: function(rollbar) {
     }
+}
+
+function fetchProjects() {
+    console.log('fetchProjects invoked!');
+    const orgId = String(sketch.Settings.settingForKey('organizations')[0].id);
+    const token = sketch.Settings.settingForKey('token');
+    const fetchProjectsURL = `https://app.qordoba.com/api/organizations/3204/projects/by_type/7`;
+    console.log(fetchProjectsURL);
+    console.log('token', token);
+    fetch(fetchProjectsURL, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'sketch',
+            'X-AUTH-TOKEN': String(token)
+        }
+
+    })
+        .then(response => {
+            // const projects = response.projects;
+            console.log('projects', response.projects);
+            console.log('response', JSON.stringify(response));
+        })
+        .catch(error => {
+            console.log('fetchProjects failed', error);
+        })
 }
 
 export default qordobaSDK;

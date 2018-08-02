@@ -3,7 +3,7 @@
   "bundleVersion": 1,
   "commands": [
     {
-      "name": "my-commandd",
+      "name": "my-command",
       "identifier": "my-command-identifier",
       "script": "./my-command.js",
       "shortcut": "cmd alt 2"
@@ -13,13 +13,20 @@
       "identifier": "login",
       "shortcut": "cmd shift y",
       "script": "./authenticate.js"
+    },
+    {
+      "name": "Upload Current Page to Qordoba",
+      "identifier": "upload-page",
+      "script": "./upload-page.js",
+      "shortcut": "cmd shift f"
     }
   ],
   "menu": {
     "title": "qordoba-for-sketch-v2",
     "items": [
       "my-command-identifier",
-      "login"
+      "login",
+      "upload-page"
     ]
   }
 }
