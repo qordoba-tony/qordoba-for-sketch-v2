@@ -108,6 +108,7 @@ input, textarea {
 }
 
 #project-dropdown-items {
+  display: none;
   position: absolute;
 }
 

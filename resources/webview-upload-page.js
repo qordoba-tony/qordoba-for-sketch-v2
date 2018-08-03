@@ -16,13 +16,43 @@ document.addEventListener("contextmenu", function(e) {
   e.preventDefault();
 });
 
+const projectDropdown = document.querySelector('#selected-proj');
+projectDropdown.addEventListener('click', (event) => {
+	const eventTarget = event.target;
+	pluginCall('debugger', JSON.stringify(eventTarget));
+	console.log('test click log');
+	const projectDropdownItems = document.querySelector('#project-dropdown-items');
+
+	if (projectDropdownItems.classList.contains('hide')) {
+		projectDropdownItems.classList.remove('hide');
+	} else {
+		projectDropdownItems.classList.add('hide');
+	}
+});
+
 window.addOrganizations = function(orgName) {
 	document.querySelector('#selected-org').innerText = orgName;
 	pluginCall('debugger', orgName);
 }
 
+window.listProjects = function (projectsArray) {
+	const parsedProjectsArray = JSON.parse(projectsArray);
+	const projectDropdownItems = document.querySelector('#project-dropdown-items');
+	parsedProjectsArray.forEach(proj => {
+		const projName = proj.name;
+		const node = document.createElement('DIV');
+		const textNode = document.createTextNode(projName);
+		node.appendChild(textNode);
+		projectDropdownItems.appendChild(node);
+		// pluginCall('debugger', JSON.stringify(proj));
+		// pluginCall('debugger', projName);
+
+	})
+}
+
 window.setTimeout(() => {
 	pluginCall('addOrganizations')
+	pluginCall('listProjects');
 }, 3000)
 
 

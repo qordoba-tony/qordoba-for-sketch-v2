@@ -104,21 +104,11 @@ input, textarea {
 
 #organizations-dropdown {
   position: absolute;
+  border: 1px solid blue;
   display: none;
 }
 
-#project-dropdown-items {
-  position: absolute;
+#dropdown-items {
+  border: 2px solid blue;
 }
 
-#projects-dropdown {
-  position: relative;
-}
-
-#selected-proj:hover {
-  cursor: pointer;
-}
-
-.hide {
-  display: none;
-}

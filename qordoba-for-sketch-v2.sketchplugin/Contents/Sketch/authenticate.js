@@ -857,6 +857,69 @@ exports['default'] = function (context) {
 
   var webContents = browserWindow.webContents;
 
+  function fetchProjects() {
+    console.log('fetchProjects invoked from authenticate.js!!!!');
+    var orgId = String(_sketch2['default'].Settings.settingForKey('organizations')[0].id);
+    console.log('orgId', orgId);
+    var token = _sketch2['default'].Settings.settingForKey('token');
+    var username = _sketch2['default'].Settings.settingForKey('username');
+    var fetchProjectsURL = 'https://app.qordoba.com/api/organizations/' + String(orgId) + '/projects/by_type/7';
+    (0, _sketchPolyfillFetch2['default'])(fetchProjectsURL, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'sketch',
+        'X-AUTH-TOKEN': token
+      }
+    }).then(function (response) {
+      console.log('response', JSON.stringify(response));
+      if (response.status === 200) {
+        response.json().then(function (data) {
+          console.log('data', JSON.stringify(data));
+          var projects = data.projects;
+          console.log('projects', JSON.stringify(projects));
+          console.log('projects.length', projects.length);
+          webContents.executeJavaScript('logInfoToRollbar("' + String(username) + '", "Request to fetch projects from Qordoba successful.")');
+          setProjectsIntoState(projects);
+        });
+      } else {
+        console.log('fetchProjects failed', username);
+        response.json().then(function (data) {
+          console.log('data', data);
+        });
+        webContents.executeJavaScript('logErrorToRollbar("' + String(username) + '", "Request to fetch projects from Qordoba unsuccessful")');
+      }
+    });
+    // .catch(error => {
+    //   console.log('fetchProjects catch statement', error);
+    // })
+  }
+
+  function setProjectsIntoState(projects) {
+    console.log('setProjectsIntoState invoked!');
+    _sketch2['default'].Settings.setSettingForKey('projects', projects);
+    projects.forEach(function (proj) {
+      // console.log('proj', JSON.stringify(proj));
+    });
+  }
+
+  function setUserInfo(userInfo) {
+    console.log('setUserInfo invoked from authenticate.js!!!!!');
+    var token = userInfo.token;
+    var loggedUser = userInfo.loggedUser;
+    var username = userInfo.loggedUser.name;
+    var organizations = userInfo.loggedUser.organizations;
+    _sketch2['default'].Settings.setSettingForKey('loggedUser', loggedUser);
+    _sketch2['default'].Settings.setSettingForKey('token', userInfo.token);
+    _sketch2['default'].Settings.setSettingForKey('username', username);
+    _sketch2['default'].Settings.setSettingForKey('organizations', organizations);
+    if (organizations.length === 0) {
+      webContents.executeJavaScript('logErrorToRollbar("' + String(username) + '", "User is not assigned to any organizations. Cannot make request to fetch projects.")');
+      return;
+    }
+    fetchProjects();
+  }
+
   // print a message when the page loads
   webContents.on('did-finish-load', function () {
     // UI.message('UI loaded!' + '...')
@@ -879,10 +942,10 @@ exports['default'] = function (context) {
       console.log('res', JSON.stringify(res));
       if (res.status === 200) {
         res.json().then(function (data) {
-          setUserInfo(data);
           var name = data.loggedUser.name;
           webContents.executeJavaScript('logInfoToRollbar("' + String(name) + '", "Login successful")');
           browserWindow.close();
+          setUserInfo(data);
         });
       } else {
         webContents.executeJavaScript('logErrorToRollbar("' + String(username) + '", "Login unsuccessful")');
@@ -934,20 +997,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'd
 
 var UI = __webpack_require__(32);
 console.log('loading authenticate.js');
-
-function setUserInfo(userInfo) {
-  console.log('setUserInfo invoked from authenticate.js!!!!!');
-  var token = userInfo.token;
-  var loggedUser = userInfo.loggedUser;
-  var username = userInfo.loggedUser.name;
-  var organizations = userInfo.loggedUser.organizations;
-
-  _sketch2['default'].Settings.setSettingForKey('loggedUser', loggedUser);
-  _sketch2['default'].Settings.setSettingForKey('organizations', organizations);
-  _sketch2['default'].Settings.setSettingForKey('token', userInfo.token);
-  _sketch2['default'].Settings.setSettingForKey('username', username);
-  // fetchProjects();
-}
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
@@ -1216,13 +1265,13 @@ module.exports.SET_SCRIPT_RESULT = 'playground/SET_SCRIPT_RESULT'
 /* 18 */
 /***/ (function(module, exports) {
 
-module.exports = "file://" + context.plugin.urlForResourceNamed("_webpack_resources/4267e1985225d34a6b721715992ef649.html").path();
+module.exports = "file://" + context.plugin.urlForResourceNamed("_webpack_resources/191a48e6b93de874277df6e33deeda06.html").path();
 
 /***/ }),
 /* 19 */
 /***/ (function(module, exports) {
 
-module.exports = "file://" + context.plugin.urlForResourceNamed("_webpack_resources/6c03d18edd9e04fea55d0194656f7a86.html").path();
+module.exports = "file://" + context.plugin.urlForResourceNamed("_webpack_resources/8b439a278d132c7e23f116f959b07c68.html").path();
 
 /***/ }),
 /* 20 */

@@ -3,33 +3,19 @@
 <head>
   <meta charset="utf-8">
   <title>Qordoba for Sketch</title>
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="41722123f1fa9697993aa856493d0dba.css">
 </head>
 <body>
   <div id='main-container'>
     <div id='login-main-content-container' class='flex-parent'>
       <div class='flex-2' id='login-main-content-left-container'>
-        <div id='logo-container'><img src='./logo.png'/></div>
+        <div id='logo-container'><img src='4da4a9b9c6cda7d2a46940305125b390.png'/></div>
       </div>
       <div id='login-main-content-right-container' class='flex-3'>
         <div class='bold-title-text'>Use Qordoba & Sketch</div>
-        <div class='grey-description-text'>Upload File</div>
+        <div class='grey-description-text'>Already logged in</div>
         <div>
-          <span id='selected-org'>Choose an Organization:</span>
-          <div id='organizations-dropdown'>
-            Dropdown
-            <ul id='organization-dropdown-items'>
-            </ul>
-          </div>
-        </div>
-
-        <div>
-          
-          <div id='projects-dropdown'>
-            <span id='selected-proj'>Choose a Project:</span>
-            <ul id='project-dropdown-items' class='hide'>
-            </ul>
-          </div>
+          <button id='logout-button'>Logout</button>
         </div>
         
       </div>
@@ -40,6 +26,7 @@
   <!-- <div id="answer"></div> -->
 
   <!-- notice the "../" here. It's because webview.js will be compiled in a different folder -->
-  <script src="../webview-upload-page.js"></script>
+  <script src="../webview-logged-in.js"></script>
+  <script src="../rollbar.js"></script>
 </body>
 </html>

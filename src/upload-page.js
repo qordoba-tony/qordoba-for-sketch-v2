@@ -3,33 +3,33 @@ import sketch from 'sketch';
 const UI = require('sketch/ui')
 console.log('loading upload-page.js!');
 
-function fetchProjects() {
-  console.log('fetchProjects invoked!');
-  const orgId = String(sketch.Settings.settingForKey('organizations')[0].id);
-  const token = sketch.Settings.settingForKey('token');
-  const fetchProjectsURL = `https://app.qordoba.com/api/organizations/${orgId}/projects/by_type/7`;
-  fetch(fetchProjectsURL, {
-    method: 'GET',
-    headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'sketch',
-        'X-AUTH-TOKEN': token
-    }
-  })
-    .then(response => {
-      console.log('response', JSON.stringify(response));
-      if (response.status === 200) {
-        response.json()
-          .then(data => {
-            console.log('data', JSON.stringify(data));
-            const projects = data.projects;
-            console.log('projects', JSON.stringify(projects));
-          })
-      } else {
-        console.log('fetchProjects failed');
-      }
-    })
-}
+// function fetchProjects() {
+//   console.log('fetchProjects invoked!');
+//   const orgId = String(sketch.Settings.settingForKey('organizations')[0].id);
+//   const token = sketch.Settings.settingForKey('token');
+//   const fetchProjectsURL = `https://app.qordoba.com/api/organizations/${orgId}/projects/by_type/7`;
+//   fetch(fetchProjectsURL, {
+//     method: 'GET',
+//     headers: {
+//         'Content-Type': 'application/json',
+//         'User-Agent': 'sketch',
+//         'X-AUTH-TOKEN': token
+//     }
+//   })
+//     .then(response => {
+//       console.log('response', JSON.stringify(response));
+//       if (response.status === 200) {
+//         response.json()
+//           .then(data => {
+//             console.log('data', JSON.stringify(data));
+//             const projects = data.projects;
+//             console.log('projects', JSON.stringify(projects));
+//           })
+//       } else {
+//         console.log('fetchProjects failed');
+//       }
+//     })
+// }
 
 export default function(context) {
 
@@ -40,7 +40,17 @@ export default function(context) {
     show: false
   }
 
-  var browserWindow = new BrowserWindow(options)
+//   var openPanel = NSOpenPanel.openPanel()
+// openPanel.setCanChooseDirectories(false)
+// openPanel.setCanChooseFiles(true)
+// openPanel.setCanCreateDirectories(false)
+// openPanel.setDirectoryURL(NSURL.fileURLWithPath('~/Documents/'))
+
+// openPanel.setTitle('Choose a file')
+// openPanel.setPrompt('Choose')
+// openPanel.runModal()
+
+  var browserWindow = new BrowserWindow(options);
 
   // only show the window when the page has loaded
   browserWindow.once('ready-to-show', () => {
@@ -68,8 +78,15 @@ export default function(context) {
     const orgName = sketch.Settings.settingForKey('organizations')[0].name;
     const parsedOrgName = String(orgName);
     webContents.executeJavaScript(`addOrganizations('${parsedOrgName}')`);
-    fetchProjects();
   });
 
+  webContents.on('listProjects', () => {
+    const projectsArray = sketch.Settings.settingForKey('projects');
+    // console.log('projectsArray', projectsArray);
+    console.log('invoking listProjects from plugin upload-page.js');
+    webContents.executeJavaScript(`listProjects('${JSON.stringify(projectsArray)}')`)
+  })
+
   browserWindow.loadURL(require('../resources/upload-page.html'))
+  console.log('context', context.document.currentPage());
 }

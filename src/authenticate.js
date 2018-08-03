@@ -7,20 +7,6 @@ import sketch from 'sketch';
 const UI = require('sketch/ui');
 console.log('loading authenticate.js');
 
-function setUserInfo (userInfo) {
-    console.log('setUserInfo invoked from authenticate.js!!!!!');
-    const token = userInfo.token;
-    const loggedUser = userInfo.loggedUser;
-    const username = userInfo.loggedUser.name;
-    const organizations = userInfo.loggedUser.organizations;
-
-    sketch.Settings.setSettingForKey('loggedUser', loggedUser);
-    sketch.Settings.setSettingForKey('organizations', organizations);
-    sketch.Settings.setSettingForKey('token', userInfo.token);
-    sketch.Settings.setSettingForKey('username', username);
-    // fetchProjects();
-  }
-
 export default function(context) {
   
   const token = sketch.Settings.settingForKey('token');
@@ -39,7 +25,73 @@ export default function(context) {
     browserWindow.show();
   })
 
-  const webContents = browserWindow.webContents
+  const webContents = browserWindow.webContents;
+
+  function fetchProjects() {
+    console.log('fetchProjects invoked from authenticate.js!!!!');
+    const orgId = String(sketch.Settings.settingForKey('organizations')[0].id);
+    console.log('orgId', orgId);
+    const token = sketch.Settings.settingForKey('token');
+    const username = sketch.Settings.settingForKey('username');
+    const fetchProjectsURL = `https://app.qordoba.com/api/organizations/${orgId}/projects/by_type/7`;
+    fetch(fetchProjectsURL, {
+      method: 'GET',
+      headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'sketch',
+          'X-AUTH-TOKEN': token
+      }
+    })
+      .then(response => {
+        console.log('response', JSON.stringify(response));
+        if (response.status === 200) {
+          response.json()
+            .then(data => {
+              console.log('data', JSON.stringify(data));
+              const projects = data.projects;
+              console.log('projects', JSON.stringify(projects));
+              console.log('projects.length', projects.length);
+              webContents.executeJavaScript(`logInfoToRollbar("${username}", "Request to fetch projects from Qordoba successful.")`);
+              setProjectsIntoState(projects);
+            })
+        } else {
+          console.log('fetchProjects failed', username);
+          response.json()
+            .then(data => {
+              console.log('data', data);
+            });
+          webContents.executeJavaScript(`logErrorToRollbar("${username}", "Request to fetch projects from Qordoba unsuccessful")`);
+        }
+      })
+      // .catch(error => {
+      //   console.log('fetchProjects catch statement', error);
+      // })
+  }
+
+  function setProjectsIntoState(projects) {
+    console.log('setProjectsIntoState invoked!');
+    sketch.Settings.setSettingForKey('projects', projects);
+    projects.forEach(proj => {
+      // console.log('proj', JSON.stringify(proj));
+    });
+  }
+
+  function setUserInfo (userInfo) {
+    console.log('setUserInfo invoked from authenticate.js!!!!!');
+    const token = userInfo.token;
+    const loggedUser = userInfo.loggedUser;
+    const username = userInfo.loggedUser.name;
+    const organizations = userInfo.loggedUser.organizations;
+    sketch.Settings.setSettingForKey('loggedUser', loggedUser);
+    sketch.Settings.setSettingForKey('token', userInfo.token);
+    sketch.Settings.setSettingForKey('username', username);
+    sketch.Settings.setSettingForKey('organizations', organizations);
+    if (organizations.length === 0) {
+      webContents.executeJavaScript(`logErrorToRollbar("${username}", "User is not assigned to any organizations. Cannot make request to fetch projects.")`);
+      return;
+    }
+    fetchProjects();
+  }
 
   // print a message when the page loads
   webContents.on('did-finish-load', () => {
@@ -64,10 +116,10 @@ export default function(context) {
         console.log('res', JSON.stringify(res));
         if (res.status === 200) {
           res.json().then(data => {
-            setUserInfo(data);
             const name = data.loggedUser.name;
             webContents.executeJavaScript(`logInfoToRollbar("${name}", "Login successful")`);
             browserWindow.close();
+            setUserInfo(data);
           });
         } else {
           webContents.executeJavaScript(`logErrorToRollbar("${username}", "Login unsuccessful")`);

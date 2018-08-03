@@ -78,27 +78,56 @@ var _rollbar2 = _interopRequireDefault(_rollbar);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 var _rollbarConfig = {
-  accessToken: "ee1a00df09e140fca8f560d78aec5700",
-  captureUncaught: true,
-  captureUnhandledRejections: true,
-  payload: {
-    environment: "development"
-  }
+	accessToken: "ee1a00df09e140fca8f560d78aec5700",
+	captureUncaught: true,
+	captureUnhandledRejections: true,
+	payload: {
+		environment: "development"
+	}
 };
 var rollbar = new _rollbar2['default'](_rollbarConfig);
 
 // Disable the context menu to have a more native feel
 document.addEventListener("contextmenu", function (e) {
-  e.preventDefault();
+	e.preventDefault();
+});
+
+var projectDropdown = document.querySelector('#selected-proj');
+projectDropdown.addEventListener('click', function (event) {
+	var eventTarget = event.target;
+	(0, _client2['default'])('debugger', JSON.stringify(eventTarget));
+	console.log('test click log');
+	var projectDropdownItems = document.querySelector('#project-dropdown-items');
+
+	if (projectDropdownItems.classList.contains('hide')) {
+		projectDropdownItems.classList.remove('hide');
+	} else {
+		projectDropdownItems.classList.add('hide');
+	}
 });
 
 window.addOrganizations = function (orgName) {
-  document.querySelector('#selected-org').innerText = orgName;
-  (0, _client2['default'])('debugger', orgName);
+	document.querySelector('#selected-org').innerText = orgName;
+	(0, _client2['default'])('debugger', orgName);
+};
+
+window.listProjects = function (projectsArray) {
+	var parsedProjectsArray = JSON.parse(projectsArray);
+	var projectDropdownItems = document.querySelector('#project-dropdown-items');
+	parsedProjectsArray.forEach(function (proj) {
+		var projName = proj.name;
+		var node = document.createElement('DIV');
+		var textNode = document.createTextNode(projName);
+		node.appendChild(textNode);
+		projectDropdownItems.appendChild(node);
+		// pluginCall('debugger', JSON.stringify(proj));
+		// pluginCall('debugger', projName);
+	});
 };
 
 window.setTimeout(function () {
-  (0, _client2['default'])('addOrganizations');
+	(0, _client2['default'])('addOrganizations');
+	(0, _client2['default'])('listProjects');
 }, 3000);
 
 /***/ }),

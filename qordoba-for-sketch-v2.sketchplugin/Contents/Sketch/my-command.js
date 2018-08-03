@@ -991,7 +991,7 @@ module.exports.SET_SCRIPT_RESULT = 'playground/SET_SCRIPT_RESULT'
 /* 11 */
 /***/ (function(module, exports) {
 
-module.exports = "file://" + context.plugin.urlForResourceNamed("_webpack_resources/6c03d18edd9e04fea55d0194656f7a86.html").path();
+module.exports = "file://" + context.plugin.urlForResourceNamed("_webpack_resources/8b439a278d132c7e23f116f959b07c68.html").path();
 
 /***/ }),
 /* 12 */

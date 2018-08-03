@@ -108,6 +108,7 @@ input, textarea {
 }
 
 #project-dropdown-items {
+  display: none;
   position: absolute;
 }
 
@@ -117,8 +118,4 @@ input, textarea {
 
 #selected-proj:hover {
   cursor: pointer;
-}
-
-.hide {
-  display: none;
 }
