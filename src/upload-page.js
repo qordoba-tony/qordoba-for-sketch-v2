@@ -1,7 +1,9 @@
 import BrowserWindow from 'sketch-module-web-view'
 import sketch from 'sketch';
 const UI = require('sketch/ui')
-console.log('loading upload-page.js!');
+
+import controller from './controller';
+// console.log('loading upload-page.js!', controller);
 
 // function fetchProjects() {
 //   console.log('fetchProjects invoked!');
@@ -40,16 +42,6 @@ export default function(context) {
     show: false
   }
 
-//   var openPanel = NSOpenPanel.openPanel()
-// openPanel.setCanChooseDirectories(false)
-// openPanel.setCanChooseFiles(true)
-// openPanel.setCanCreateDirectories(false)
-// openPanel.setDirectoryURL(NSURL.fileURLWithPath('~/Documents/'))
-
-// openPanel.setTitle('Choose a file')
-// openPanel.setPrompt('Choose')
-// openPanel.runModal()
-
   var browserWindow = new BrowserWindow(options);
 
   // only show the window when the page has loaded
@@ -83,10 +75,18 @@ export default function(context) {
   webContents.on('listProjects', () => {
     const projectsArray = sketch.Settings.settingForKey('projects');
     // console.log('projectsArray', projectsArray);
-    console.log('invoking listProjects from plugin upload-page.js');
     webContents.executeJavaScript(`listProjects('${JSON.stringify(projectsArray)}')`)
-  })
+  });
+
+  webContents.on('testUpload', () => {
+    
+    // const projectId = '53';
+    // const orgId = '1';
+    const org = sketch.Settings.settingForKey('organizations')[0];
+    const project = sketch.Settings.settingForKey('projects')[0];
+    console.log('testUpload handler invoked', JSON.stringify(org), JSON.stringify(project));
+    controller.uploadCurrentPage(org, project, context);
+  });
 
   browserWindow.loadURL(require('../resources/upload-page.html'))
-  console.log('context', context.document.currentPage());
 }

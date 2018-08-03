@@ -16,6 +16,11 @@ document.addEventListener("contextmenu", function(e) {
   e.preventDefault();
 });
 
+const testButton = document.querySelector('#test-button');
+testButton.addEventListener('click', () => {
+	pluginCall('testUpload');
+});
+
 const projectDropdown = document.querySelector('#selected-proj');
 projectDropdown.addEventListener('click', (event) => {
 	const eventTarget = event.target;

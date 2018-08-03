@@ -92,6 +92,11 @@ document.addEventListener("contextmenu", function (e) {
 	e.preventDefault();
 });
 
+var testButton = document.querySelector('#test-button');
+testButton.addEventListener('click', function () {
+	(0, _client2['default'])('testUpload');
+});
+
 var projectDropdown = document.querySelector('#selected-proj');
 projectDropdown.addEventListener('click', function (event) {
 	var eventTarget = event.target;

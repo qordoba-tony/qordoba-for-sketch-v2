@@ -687,18 +687,9 @@ exports['default'] = function (context) {
     width: 600,
     height: 350,
     show: false
+  };
 
-    //   var openPanel = NSOpenPanel.openPanel()
-    // openPanel.setCanChooseDirectories(false)
-    // openPanel.setCanChooseFiles(true)
-    // openPanel.setCanCreateDirectories(false)
-    // openPanel.setDirectoryURL(NSURL.fileURLWithPath('~/Documents/'))
-
-    // openPanel.setTitle('Choose a file')
-    // openPanel.setPrompt('Choose')
-    // openPanel.runModal()
-
-  };var browserWindow = new _sketchModuleWebView2['default'](options);
+  var browserWindow = new _sketchModuleWebView2['default'](options);
 
   // only show the window when the page has loaded
   browserWindow.once('ready-to-show', function () {
@@ -731,12 +722,20 @@ exports['default'] = function (context) {
   webContents.on('listProjects', function () {
     var projectsArray = _sketch2['default'].Settings.settingForKey('projects');
     // console.log('projectsArray', projectsArray);
-    console.log('invoking listProjects from plugin upload-page.js');
     webContents.executeJavaScript('listProjects(\'' + String(JSON.stringify(projectsArray)) + '\')');
   });
 
+  webContents.on('testUpload', function () {
+
+    // const projectId = '53';
+    // const orgId = '1';
+    var org = _sketch2['default'].Settings.settingForKey('organizations')[0];
+    var project = _sketch2['default'].Settings.settingForKey('projects')[0];
+    console.log('testUpload handler invoked', JSON.stringify(org), JSON.stringify(project));
+    _controller2['default'].uploadCurrentPage(org, project, context);
+  });
+
   browserWindow.loadURL(__webpack_require__(11));
-  console.log('context', context.document.currentPage());
 };
 
 var _sketchModuleWebView = __webpack_require__(12);
@@ -747,10 +746,14 @@ var _sketch = __webpack_require__(20);
 
 var _sketch2 = _interopRequireDefault(_sketch);
 
+var _controller = __webpack_require__(24);
+
+var _controller2 = _interopRequireDefault(_controller);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 var UI = __webpack_require__(21);
-console.log('loading upload-page.js!');
+// console.log('loading upload-page.js!', controller);
 
 // function fetchProjects() {
 //   console.log('fetchProjects invoked!');
@@ -1047,7 +1050,7 @@ module.exports.SET_SCRIPT_RESULT = 'playground/SET_SCRIPT_RESULT'
 /* 11 */
 /***/ (function(module, exports) {
 
-module.exports = "file://" + context.plugin.urlForResourceNamed("_webpack_resources/da322e4785da3ccb9202d8395a2c6dc6.html").path();
+module.exports = "file://" + context.plugin.urlForResourceNamed("_webpack_resources/476d9bbf6fb0c5684bbf7dd156f10d06.html").path();
 
 /***/ }),
 /* 12 */
@@ -2400,6 +2403,1523 @@ module.exports = require("sketch");
 /***/ (function(module, exports) {
 
 module.exports = require("sketch/ui");
+
+/***/ }),
+/* 22 */,
+/* 23 */,
+/* 24 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(console) {Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _qordobaEditor = __webpack_require__(25);
+
+var _qordobaEditor2 = _interopRequireDefault(_qordobaEditor);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+console.log('controller.js loaded!');
+
+var controller = {
+	translateCurrentPage: function () {
+		function translateCurrentPage(organization, project, language, symbolOption, context) {
+			var doc = context.document;
+			if (!project || !language || !organization) {
+				fireConfiguration(context);
+				return;
+			}
+			var currentPage = doc.currentPage;
+
+			var success = true;
+			var errors = 0;
+			if (utils.isGeneratedPage(currentPage, context)) {
+				fireError("Warning!", "This Page is the translated version. To fetch an updated version of the translation, please pull from the original Page.");
+				return;
+			}
+			var pageName = currentPage.name;
+			var documentName = doc.displayName().replace(/.sketch$/, "");
+			var translations = downloadFileByName(context, organization.id, project.id, language.id, documentName + " - " + pageName);
+			if (translations) {
+				errors = translate.translatePageWithData(context, currentPage, language, translations, symbolOption);
+				if (errors > 0) {
+					fireError("Success!", "Translated Pages created successfully. " + errors + " text layers could not be found.");
+				} else {
+					fireError("Success!", "Translated Pages created successfully.");
+				}
+				return;
+			} else {
+				fireError("Error!", "Couldn't load the translated content.");
+				return;
+			}
+		}
+
+		return translateCurrentPage;
+	}(),
+	uploadCurrentPage: function () {
+		function uploadCurrentPage(organization, project, context) {
+			// console.log('uploadCurrentPage invoked', organization, project, context);
+			console.log("Upload current page for project: " + project.id);
+			var editor = _qordobaEditor2['default'].editor.init(context);
+			console.log('editor', editor);
+			editor.upload(organization.id, project.id, context);
+		}
+
+		return uploadCurrentPage;
+	}()
+};
+
+exports['default'] = controller;
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+
+/***/ }),
+/* 25 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(console) {Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _MochaJSDelegate = __webpack_require__(26);
+
+var _MochaJSDelegate2 = _interopRequireDefault(_MochaJSDelegate);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+console.log('loading qordoba-editor.js');
+
+var qordobaSDK = qordobaSDK || {};
+// log("Start....");
+var I18N = {},
+    lang = "en-US",
+    language = "";
+
+function _(str, data) {
+    var str = I18N[lang] && I18N[lang][str] ? I18N[lang][str] : str;
+
+    var idx = -1;
+    return str.replace(/\%\@/gi, function () {
+        idx++;
+        return data[idx];
+    });
+}
+
+qordobaSDK.editor = {
+    init: function () {
+        function init(context) {
+            this.extend(context);
+            this.document = context.document;
+            this.documentData = this.document.documentData();
+            this.window = this.document.window();
+            this.pages = this.document.pages();
+            this.page = this.document.currentPage();
+            this.artboard = this.page.currentArtboard();
+            this.current = this.artboard || this.page;
+            this.pluginRoot = this.scriptPath.stringByDeletingLastPathComponent().stringByDeletingLastPathComponent().stringByDeletingLastPathComponent();
+            this.pluginSketch = this.pluginRoot + "/Contents/Sketch/helpers";
+
+            if (NSFileManager.defaultManager().fileExistsAtPath(this.pluginSketch + "/i18n/" + lang + ".json")) {
+                language = NSString.stringWithContentsOfFile_encoding_error(this.pluginSketch + "/i18n/" + lang + ".json", NSUTF8StringEncoding, nil);
+
+                I18N[lang] = JSON.parse(language);
+                language = "I18N[\'" + lang + "\'] = " + language;
+            }
+
+            this.symbolsPage = this.find({ key: "(name != NULL) && (name == %@)", match: "Symbols" }, this.document);
+            this.symbolsPage = this.symbolsPage.count ? this.symbolsPage[0] : this.symbolsPage;
+            if (!this.symbolsPage) {
+                this.symbolsPage = this.document.addBlankPage();
+                this.symbolsPage.setName("Symbols");
+                this.document.setCurrentPage(this.page);
+            }
+
+            this.configs = this.getConfigs();
+            return this;
+        }
+
+        return init;
+    }(),
+    extend: function () {
+        function extend(options, target) {
+            var target = target || this;
+
+            for (var key in options) {
+                target[key] = options[key];
+            }
+            return target;
+        }
+
+        return extend;
+    }()
+};
+
+var BorderPositions = ["center", "inside", "outside"];
+var FillTypes = ["color", "gradient"];
+var GradientTypes = ["linear", "radial", "angular"];
+var TextAligns = ["left", "right", "center", "justify", "left"];
+
+qordobaSDK.editor.extend({
+    regexNames: /OVERLAY\#|WIDTH\#|HEIGHT\#|TOP\#|RIGHT\#|BOTTOM\#|LEFT\#|VERTICAL\#|HORIZONTAL\#|NOTE\#|PROPERTY\#|LITE\#/,
+    colors: {
+        overlay: {
+            layer: { r: 1, g: 0.333333, b: 0, a: 0.3 },
+            text: { r: 1, g: 1, b: 1, a: 1 }
+        },
+        size: {
+            layer: { r: 1, g: 0.333333, b: 0, a: 1 },
+            text: { r: 1, g: 1, b: 1, a: 1 }
+        },
+        spacing: {
+            layer: { r: 0.313725, g: 0.890196, b: 0.760784, a: 1 },
+            text: { r: 1, g: 1, b: 1, a: 1 }
+        },
+        property: {
+            layer: { r: 0.960784, g: 0.650980, b: 0.137255, a: 1 },
+            text: { r: 1, g: 1, b: 1, a: 1 }
+        },
+        lite: {
+            layer: { r: 0.564706, g: 0.074510, b: 0.996078, a: 1 },
+            text: { r: 1, g: 1, b: 1, a: 1 }
+        },
+        note: {
+            layer: { r: 1, g: 0.988235, b: 0.862745, a: 1 },
+            border: { r: 0.8, g: 0.8, b: 0.8, a: 1 },
+            text: { r: 0.333333, g: 0.333333, b: 0.333333, a: 1 }
+        }
+    }
+});
+
+// api.js
+qordobaSDK.editor.extend({
+    is: function () {
+        function is(layer, theClass) {
+            if (!layer) return false;
+            var klass = layer["class"]();
+            return klass === theClass;
+        }
+
+        return is;
+    }(),
+    addGroup: function () {
+        function addGroup() {
+            return MSLayerGroup["new"]();
+        }
+
+        return addGroup;
+    }(),
+    addShape: function () {
+        function addShape() {
+            var shape = MSRectangleShape.alloc().initWithFrame(NSMakeRect(0, 0, 100, 100));
+            return MSShapeGroup.shapeWithPath(shape);
+        }
+
+        return addShape;
+    }(),
+    addText: function () {
+        function addText(container) {
+            var text = MSTextLayer["new"]();
+            text.setStringValue("text");
+            return text;
+        }
+
+        return addText;
+    }(),
+    removeLayer: function () {
+        function removeLayer(layer) {
+            var container = layer.parentGroup();
+            if (container) container.removeLayer(layer);
+        }
+
+        return removeLayer;
+    }(),
+    getRect: function () {
+        function getRect(layer) {
+            var rect = layer.absoluteRect();
+            return {
+                x: Math.round(rect.x()),
+                y: Math.round(rect.y()),
+                width: Math.round(rect.width()),
+                height: Math.round(rect.height()),
+                maxX: Math.round(rect.x() + rect.width()),
+                maxY: Math.round(rect.y() + rect.height()),
+                setX: function () {
+                    function setX(x) {
+                        rect.setX(x);this.x = x;this.maxX = this.x + this.width;
+                    }
+
+                    return setX;
+                }(),
+                setY: function () {
+                    function setY(y) {
+                        rect.setY(y);this.y = y;this.maxY = this.y + this.height;
+                    }
+
+                    return setY;
+                }(),
+                setWidth: function () {
+                    function setWidth(width) {
+                        rect.setWidth(width);this.width = width;this.maxX = this.x + this.width;
+                    }
+
+                    return setWidth;
+                }(),
+                setHeight: function () {
+                    function setHeight(height) {
+                        rect.setHeight(height);this.height = height;this.maxY = this.y + this.height;
+                    }
+
+                    return setHeight;
+                }()
+            };
+        }
+
+        return getRect;
+    }(),
+    toNopPath: function () {
+        function toNopPath(str) {
+            return this.toJSString(str).replace(/[\/\\\?]/g, " ");
+        }
+
+        return toNopPath;
+    }(),
+    toHTMLEncode: function () {
+        function toHTMLEncode(str) {
+            return this.toJSString(str).replace(/\&/g, "&amp;").replace(/\</g, "&lt;").replace(/\>/g, '&gt;').replace(/\'/g, "&#39;").replace(/\"/g, "&quot;").replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
+            // return str.replace(/\&/g, "&amp;").replace(/\"/g, "&quot;").replace(/\'/g, "&#39;").replace(/\</g, "&lt;").replace(/\>/g, '&gt;');
+        }
+
+        return toHTMLEncode;
+    }(),
+    toSlug: function () {
+        function toSlug(str) {
+            return this.toJSString(str).toLowerCase().replace(/(<([^>]+)>)/ig, "").replace(/[\/\+\|]/g, " ").replace(new RegExp("[\\!@#$%^&\\*\\(\\)\\?=\\{\\}\\[\\]\\\\\\\,\\.\\:\\;\\']", "gi"), '').replace(/\s+/g, '-');
+        }
+
+        return toSlug;
+    }(),
+    toJSString: function () {
+        function toJSString(str) {
+            return new String(str).toString();
+        }
+
+        return toJSString;
+    }(),
+    toJSNumber: function () {
+        function toJSNumber(str) {
+            return Number(this.toJSString(str));
+        }
+
+        return toJSNumber;
+    }(),
+    pointToJSON: function () {
+        function pointToJSON(point) {
+            return {
+                x: parseFloat(point.x),
+                y: parseFloat(point.y)
+            };
+        }
+
+        return pointToJSON;
+    }(),
+    rectToJSON: function () {
+        function rectToJSON(rect, referenceRect) {
+            if (referenceRect) {
+                return {
+                    x: Math.round(rect.x() - referenceRect.x()),
+                    y: Math.round(rect.y() - referenceRect.y()),
+                    width: Math.round(rect.width()),
+                    height: Math.round(rect.height())
+                };
+            }
+
+            return {
+                x: Math.round(rect.x()),
+                y: Math.round(rect.y()),
+                width: Math.round(rect.width()),
+                height: Math.round(rect.height())
+            };
+        }
+
+        return rectToJSON;
+    }(),
+    colorToJSON: function () {
+        function colorToJSON(color) {
+            return {
+                r: Math.round(color.red() * 255),
+                g: Math.round(color.green() * 255),
+                b: Math.round(color.blue() * 255),
+                a: color.alpha(),
+                "color-hex": color.immutableModelObject().stringValueWithAlpha(false) + " " + Math.round(color.alpha() * 100) + "%",
+                "argb-hex": "#" + this.toHex(color.alpha() * 255) + color.immutableModelObject().stringValueWithAlpha(false).replace("#", ""),
+                "css-rgba": "rgba(" + [Math.round(color.red() * 255), Math.round(color.green() * 255), Math.round(color.blue() * 255), Math.round(color.alpha() * 100) / 100].join(",") + ")",
+                "ui-color": "(" + ["r:" + (Math.round(color.red() * 100) / 100).toFixed(2), "g:" + (Math.round(color.green() * 100) / 100).toFixed(2), "b:" + (Math.round(color.blue() * 100) / 100).toFixed(2), "a:" + (Math.round(color.alpha() * 100) / 100).toFixed(2)].join(" ") + ")"
+            };
+        }
+
+        return colorToJSON;
+    }(),
+    colorStopToJSON: function () {
+        function colorStopToJSON(colorStop) {
+            return {
+                color: this.colorToJSON(colorStop.color()),
+                position: colorStop.position()
+            };
+        }
+
+        return colorStopToJSON;
+    }(),
+    gradientToJSON: function () {
+        function gradientToJSON(gradient) {
+            var stopsData = [],
+                stop,
+                stopIter = gradient.stops().objectEnumerator();
+            while (stop = stopIter.nextObject()) {
+                stopsData.push(this.colorStopToJSON(stop));
+            }
+
+            return {
+                type: GradientTypes[gradient.gradientType()],
+                from: this.pointToJSON(gradient.from()),
+                to: this.pointToJSON(gradient.to()),
+                colorStops: stopsData
+            };
+        }
+
+        return gradientToJSON;
+    }(),
+    shadowToJSON: function () {
+        function shadowToJSON(shadow) {
+            return {
+                type: shadow instanceof MSStyleShadow ? "outer" : "inner",
+                offsetX: shadow.offsetX(),
+                offsetY: shadow.offsetY(),
+                blurRadius: shadow.blurRadius(),
+                spread: shadow.spread(),
+                color: this.colorToJSON(shadow.color())
+            };
+        }
+
+        return shadowToJSON;
+    }(),
+    getRadius: function () {
+        function getRadius(layer) {
+            return layer.layers && this.is(layer.layers().firstObject(), MSRectangleShape) ? layer.layers().firstObject().fixedRadius() : 0;
+        }
+
+        return getRadius;
+    }(),
+    getBorders: function () {
+        function getBorders(style) {
+            var bordersData = [],
+                border,
+                borderIter = style.borders().objectEnumerator();
+            while (border = borderIter.nextObject()) {
+                if (border.isEnabled()) {
+                    var fillType = FillTypes[border.fillType()],
+                        borderData = {
+                        fillType: fillType,
+                        position: BorderPositions[border.position()],
+                        thickness: border.thickness()
+                    };
+
+                    switch (fillType) {
+                        case "color":
+                            borderData.color = this.colorToJSON(border.color());
+                            break;
+
+                        case "gradient":
+                            borderData.gradient = this.gradientToJSON(border.gradient());
+                            break;
+
+                        default:
+                            continue;
+                    }
+
+                    bordersData.push(borderData);
+                }
+            }
+
+            return bordersData;
+        }
+
+        return getBorders;
+    }(),
+    getFills: function () {
+        function getFills(style) {
+            var fillsData = [],
+                fill,
+                fillIter = style.fills().objectEnumerator();
+            while (fill = fillIter.nextObject()) {
+                if (fill.isEnabled()) {
+                    var fillType = FillTypes[fill.fillType()],
+                        fillData = {
+                        fillType: fillType
+                    };
+
+                    switch (fillType) {
+                        case "color":
+                            fillData.color = this.colorToJSON(fill.color());
+                            break;
+
+                        case "gradient":
+                            fillData.gradient = this.gradientToJSON(fill.gradient());
+                            break;
+
+                        default:
+                            continue;
+                    }
+
+                    fillsData.push(fillData);
+                }
+            }
+
+            return fillsData;
+        }
+
+        return getFills;
+    }(),
+    getShadows: function () {
+        function getShadows(style) {
+            var shadowsData = [],
+                shadow,
+                shadowIter = style.shadows().objectEnumerator();
+            while (shadow = shadowIter.nextObject()) {
+                if (shadow.isEnabled()) {
+                    shadowsData.push(this.shadowToJSON(shadow));
+                }
+            }
+
+            shadowIter = style.innerShadows().objectEnumerator();
+            while (shadow = shadowIter.nextObject()) {
+                if (shadow.isEnabled()) {
+                    shadowsData.push(this.shadowToJSON(shadow));
+                }
+            }
+
+            return shadowsData;
+        }
+
+        return getShadows;
+    }(),
+    getOpacity: function () {
+        function getOpacity(style) {
+            return style.contextSettings().opacity();
+        }
+
+        return getOpacity;
+    }(),
+    getStyleName: function () {
+        function getStyleName(layer) {
+            var styles = this.is(layer, MSTextLayer) ? this.document.documentData().layerTextStyles() : this.document.documentData().layerStyles(),
+                layerStyle = layer.style(),
+                sharedObjectID = layerStyle.sharedObjectID(),
+                style;
+
+            styles = styles.objectsSortedByName();
+
+            if (styles.count() > 0) {
+                style = this.find({ key: "(objectID != NULL) && (objectID == %@)", match: sharedObjectID }, styles);
+            }
+
+            if (!style) return "";
+            return this.toJSString(style.name());
+        }
+
+        return getStyleName;
+    }()
+});
+
+// help.js
+qordobaSDK.editor.extend({
+    toHex: function () {
+        function toHex(c) {
+            var hex = Math.round(c).toString(16).toUpperCase();
+            return hex.length == 1 ? "0" + hex : hex;
+        }
+
+        return toHex;
+    }(),
+    isIntersect: function () {
+        function isIntersect(targetRect, layerRect) {
+            return !(targetRect.maxX <= layerRect.x || targetRect.x >= layerRect.maxX || targetRect.y >= layerRect.maxY || targetRect.maxY <= layerRect.y);
+        }
+
+        return isIntersect;
+    }(),
+    getDistance: function () {
+        function getDistance(targetRect, containerRect) {
+            var containerRect = containerRect || this.getRect(this.current);
+
+            return {
+                top: targetRect.y - containerRect.y,
+                right: containerRect.maxX - targetRect.maxX,
+                bottom: containerRect.maxY - targetRect.maxY,
+                left: targetRect.x - containerRect.x
+            };
+        }
+
+        return getDistance;
+    }(),
+    message: function () {
+        function message(_message) {
+            this.document.showMessage(_message);
+        }
+
+        return message;
+    }(),
+    find: function () {
+        function find(format, container, returnArray) {
+            if (!format || !format.key || !format.match) {
+                return false;
+            }
+            var predicate = NSPredicate.predicateWithFormat(format.key, format.match),
+                container = container || this.current,
+                items;
+
+            if (container["class"] && container["class"]() == __NSArrayI) {
+                items = container;
+            } else if (container.pages) {
+                items = container.pages();
+            } else if (this.is(container, MSSharedStyleContainer) || this.is(container, MSSharedTextStyleContainer)) {
+                items = container.objectsSortedByName();
+            } else if (container.children) {
+                items = container.children();
+            } else {
+                items = container;
+            }
+
+            var queryResult = items.filteredArrayUsingPredicate(predicate);
+
+            if (returnArray) return queryResult;
+
+            if (queryResult.count() == 1) {
+                return queryResult[0];
+            } else if (queryResult.count() > 0) {
+                return queryResult;
+            } else {
+                return false;
+            }
+        }
+
+        return find;
+    }()
+});
+
+// configs.js
+qordobaSDK.editor.extend({
+    getConfigs: function () {
+        function getConfigs(container) {
+            return JSON.parse('{"colorFormat": "argb-hex", "exportOption": "1","scale": "0.5","timestamp": 1471251211802,"unit": "pt"}');
+        }
+
+        return getConfigs;
+    }()
+});
+
+// Panel.js
+qordobaSDK.editor.extend({
+    WebPanel: function () {
+        function WebPanel(options) {
+            var self = this,
+                options = this.extend(options, {
+                url: this.pluginSketch + "/panel/processing.html",
+                width: 240,
+                height: 316,
+                state: 1,
+                floatWindow: false,
+                data: {
+                    density: 2,
+                    unit: "dp/sp"
+                },
+                titleBgColor: {
+                    r: 0.305,
+                    g: 0.294,
+                    b: 0.450,
+                    a: 1
+                },
+                contentBgColor: {
+                    r: 0.305,
+                    g: 0.294,
+                    b: 0.450,
+                    a: 1
+                },
+                hideClostButton: true,
+                callback: function () {
+                    function callback(data) {
+                        return data;
+                    }
+
+                    return callback;
+                }()
+            }),
+                result = false;
+            options.url = encodeURI("file://" + options.url);
+
+            COScript.currentCOScript().setShouldKeepAround_(true);
+
+            var frame = NSMakeRect(0, 0, options.width, options.height + 32),
+
+            //titleBgColor = NSColor.colorWithRed_green_blue_alpha(0.1, 0.1, 0.1, 1),
+            //titleBgColor = NSColor.colorWithRed_green_blue_alpha(0.92,0.92,0.92,1),
+            titleBgColor = NSColor.colorWithRed_green_blue_alpha(options.titleBgColor.r, options.titleBgColor.g, options.titleBgColor.b, options.titleBgColor.a),
+                contentBgColor = NSColor.colorWithRed_green_blue_alpha(options.contentBgColor.r, options.contentBgColor.g, options.contentBgColor.b, options.contentBgColor.a);
+            //contentBgColor = NSColor.colorWithRed_green_blue_alpha(1, 1, 1, 1);
+            //contentBgColor = NSColor.colorWithRed_green_blue_alpha(0.13, 0.13, 0.13, 1);
+
+            var Panel = NSPanel.alloc().init();
+
+            Panel.setTitlebarAppearsTransparent(true);
+            Panel.standardWindowButton(NSWindowCloseButton).setHidden(options.hideClostButton);
+            Panel.standardWindowButton(NSWindowMiniaturizeButton).setHidden(true);
+            Panel.standardWindowButton(NSWindowZoomButton).setHidden(true);
+            Panel.setFrame_display(frame, false);
+            Panel.setBackgroundColor(contentBgColor);
+
+            var contentView = Panel.contentView(),
+                webView = WebView.alloc().initWithFrame(NSMakeRect(0, 0, options.width, options.height)),
+                windowObject = webView.windowScriptObject(),
+                delegate = new _MochaJSDelegate2["default"]({
+                "webView:didFinishLoadForFrame:": function () {
+                    function webViewDidFinishLoadForFrame(webView, webFrame) {
+                        var WebAction = ["function WebAction(data){", "window.SMData = encodeURI(JSON.stringify(data));", "window.location.hash = 'submit';",
+                        // "console.log(SMData)",
+                        "}", "function SMImportAction(data){", "window.location.hash = 'import';",
+                        // "console.log(SMData)",
+                        "}"].join(""),
+                            DOMReady = ["$(", "function(){", "init(" + JSON.stringify(options.data) + ")", "}", ");"].join("");
+
+                        windowObject.evaluateWebScript(WebAction);
+                        windowObject.evaluateWebScript(language);
+                        windowObject.evaluateWebScript(DOMReady);
+                        COScript.currentCOScript().setShouldKeepAround_(false);
+                    }
+
+                    return webViewDidFinishLoadForFrame;
+                }(),
+                "webView:didChangeLocationWithinPageForFrame:": function () {
+                    function webViewDidChangeLocationWithinPageForFrame(webView, webFrame) {
+                        var request = NSURL.URLWithString(webView.mainFrameURL()).fragment();
+
+                        if (options.state) {
+                            Panel.orderOut(nil);
+                            NSApp.stopModal();
+                            if (request == "submit") {
+                                var data = JSON.parse(decodeURI(windowObject.valueForKey("SMData")));
+                                options.callback(data);
+                                result = true;
+                            }
+                        } else if (request == "import") {
+                            if (options.importCallback(Panel, NSApp)) {
+                                self.message(_("Import complete!"));
+                            } else {
+                                windowObject.evaluateWebScript("window.location.hash = '';");
+                            }
+                        } else if (request == "complete") {}
+                        COScript.currentCOScript().setShouldKeepAround_(false);
+                    }
+
+                    return webViewDidChangeLocationWithinPageForFrame;
+                }()
+            });
+
+            contentView.setWantsLayer(true);
+            contentView.layer().setFrame(contentView.frame());
+            contentView.layer().setCornerRadius(6);
+            contentView.layer().setMasksToBounds(true);
+
+            webView.setBackgroundColor(contentBgColor);
+            webView.setFrameLoadDelegate_(delegate.getClassInstance());
+            webView.setMainFrameURL_(options.url);
+
+            contentView.addSubview(webView);
+
+            var closeButton = Panel.standardWindowButton(NSWindowCloseButton);
+            closeButton.setCOSJSTargetFunction(function (sender) {
+                var request = NSURL.URLWithString(webView.mainFrameURL()).fragment();
+                if (options.state == 0 && request == "submit") {
+                    data = JSON.parse(decodeURI(windowObject.valueForKey("SMData")));
+                    options.callback(data);
+                }
+                self.wantsStop = true;
+                Panel.orderOut(nil);
+                NSApp.stopModal();
+            });
+            closeButton.setAction("callAction:");
+
+            var titlebarView = contentView.superview().titlebarViewController().view(),
+                titlebarContainerView = titlebarView.superview();
+            closeButton.setFrameOrigin(NSMakePoint(8, 8));
+            titlebarContainerView.setFrame(NSMakeRect(0, options.height, options.width, 32));
+            titlebarView.setFrameSize(NSMakeSize(options.width, 32));
+            titlebarView.setTransparent(true);
+            titlebarView.setBackgroundColor(titleBgColor);
+            titlebarContainerView.superview().setBackgroundColor(titleBgColor);
+
+            if (options.floatWindow) {
+                Panel.becomeKeyWindow();
+                Panel.setLevel(NSFloatingWindowLevel);
+                Panel.center();
+                Panel.orderFront(NSApp.mainWindow());
+                return webView;
+            } else {
+                NSApp.runModalForWindow(Panel);
+            }
+
+            return result;
+        }
+
+        return WebPanel;
+    }()
+});
+
+// export.js
+qordobaSDK.editor.extend({
+    slices: [],
+    sliceCache: {},
+    maskCache: [],
+    hasExportSizes: function () {
+        function hasExportSizes(layer) {
+            return layer.exportOptions().exportFormats().count() > 0;
+        }
+
+        return hasExportSizes;
+    }(),
+    isSliceGroup: function () {
+        function isSliceGroup(layer) {
+            return this.is(layer, MSLayerGroup) && this.hasExportSizes(layer);
+        }
+
+        return isSliceGroup;
+    }(),
+    isExportable: function () {
+        function isExportable(layer) {
+            return this.is(layer, MSTextLayer) || this.is(layer, MSShapeGroup) || this.is(layer, MSBitmapLayer) || this.is(layer, MSSliceLayer) || this.is(layer, MSSymbolInstance) || this.isSliceGroup(layer);
+        }
+
+        return isExportable;
+    }(),
+    getStates: function () {
+        function getStates(layer) {
+            var isVisible = true,
+                isLocked = false,
+                hasSlice = false,
+                isEmpty = false,
+                isMaskChildLayer = false,
+                isMeasure = false;
+
+            while (!(this.is(layer, MSArtboardGroup) || this.is(layer, MSSymbolMaster))) {
+                var group = layer.parentGroup();
+
+                if (this.regexNames.exec(group.name())) {
+                    isMeasure = true;
+                }
+
+                if (!layer.isVisible()) {
+                    isVisible = false;
+                }
+
+                if (layer.isLocked()) {
+                    isLocked = true;
+                }
+
+                if (this.is(group, MSLayerGroup) && this.hasExportSizes(group)) {
+                    hasSlice = true;
+                }
+
+                if (this.maskObjectID && group.objectID() == this.maskObjectID && !layer.shouldBreakMaskChain()) {
+                    isMaskChildLayer = true;
+                }
+
+                if (this.is(layer, MSTextLayer) && layer.isEmpty()) {
+                    isEmpty = true;
+                }
+
+                layer = group;
+            }
+            return {
+                isVisible: isVisible,
+                isLocked: isLocked,
+                hasSlice: hasSlice,
+                isMaskChildLayer: isMaskChildLayer,
+                isMeasure: isMeasure,
+                isEmpty: isEmpty
+            };
+        }
+
+        return getStates;
+    }(),
+    checkMask: function () {
+        function checkMask(group, layer, layerData, layerStates) {
+            if (layer.hasClippingMask()) {
+                if (layerStates.isMaskChildLayer) {
+                    this.maskCache.push({
+                        objectID: this.maskObjectID,
+                        rect: this.maskRect
+                    });
+                }
+                this.maskObjectID = group.objectID();
+                this.maskRect = layerData.rect;
+            } else if (!layerStates.isMaskChildLayer && this.maskCache.length > 0) {
+                var mask = this.maskCache.pop();
+                this.maskObjectID = mask.objectID;
+                this.maskRect = mask.rect;
+                layerStates.isMaskChildLayer = true;
+            } else if (!layerStates.isMaskChildLayer) {
+                this.maskObjectID = undefined;
+                this.maskRect = undefined;
+            }
+
+            if (layerStates.isMaskChildLayer) {
+                var layerRect = layerData.rect,
+                    maskRect = this.maskRect;
+
+                layerRect.maxX = layerRect.x + layerRect.width;
+                layerRect.maxY = layerRect.y + layerRect.height;
+                maskRect.maxX = maskRect.x + maskRect.width;
+                maskRect.maxY = maskRect.y + maskRect.height;
+
+                var distance = this.getDistance(layerRect, maskRect),
+                    width = layerRect.width,
+                    height = layerRect.height;
+
+                if (distance.left < 0) width += distance.left;
+                if (distance.right < 0) width += distance.right;
+                if (distance.top < 0) height += distance.top;
+                if (distance.bottom < 0) height += distance.bottom;
+
+                layerData.rect = {
+                    x: distance.left < 0 ? maskRect.x : layerRect.x,
+                    y: distance.top < 0 ? maskRect.y : layerRect.y,
+                    width: width,
+                    height: height
+                };
+            }
+        }
+
+        return checkMask;
+    }(),
+    getExportable: function () {
+        function getExportable(layer, savePath) {
+            var self = this,
+                exportable = [],
+                size,
+                sizes = layer.exportOptions().exportFormats(),
+                sizesInter = sizes.objectEnumerator();
+
+            var androidDensity = {
+                "@0.75x": "ldpi",
+                "@1x": "mdpi",
+                "@1.5x": "hdpi",
+                "@2x": "xhdpi",
+                "@3x": "xxhdpi",
+                "@4x": "xxxhdpi"
+            };
+
+            while (size = sizesInter.nextObject()) {
+
+                var size = this.toJSString(size).split(" "),
+                    scale = self.toJSNumber(size[0]),
+                    format = size[2],
+                    suffix = this.toJSString(size[1]),
+                    suffix = suffix || "",
+                    density = suffix,
+                    drawablePath = "";
+
+                if (sizes.count() == 1 && self.configs.scale != 1 && !density) {
+                    suffix = "@" + self.configs.scale + "x";
+                    density = suffix;
+                }
+
+                if (sizes.count() == 1 && scale == 1 && self.configs.scale == 1 && !density || sizes.count() > 1 && !density) {
+                    density = "@1x";
+                }
+
+                // Android
+                if (self.configs.unit == "dp/sp") {
+                    drawablePath = "drawable-" + androidDensity[density] + "/";
+                    density = androidDensity[density];
+                    suffix = "";
+                }
+
+                this.exportImage({
+                    layer: layer,
+                    path: self.assetsPath,
+                    scale: scale,
+                    name: drawablePath + layer.name(),
+                    suffix: suffix,
+                    format: format
+                });
+
+                exportable.push({
+                    name: self.toJSString(layer.name()),
+                    density: density,
+                    format: format,
+                    path: drawablePath + layer.name() + suffix + "." + format
+                });
+            }
+
+            return exportable;
+        }
+
+        return getExportable;
+    }(),
+    checkSlice: function () {
+        function checkSlice(layer, layerData, symbolLayer) {
+            var objectID = layerData.type == "symbol" ? this.toJSString(layer.symbolMaster().objectID()) : symbolLayer ? this.toJSString(symbolLayer.objectID()) : layerData.objectID;
+            if ((layerData.type == "slice" || layerData.type == "symbol" && this.hasExportSizes(layer.symbolMaster())) && !this.sliceCache[objectID]) {
+                var sliceLayer = layerData.type == "symbol" ? layer.symbolMaster() : layer;
+                if (symbolLayer && this.is(symbolLayer.parentGroup(), MSSymbolMaster)) {
+                    layer.exportOptions().setLayerOptions(2);
+                }
+
+                this.assetsPath = this.savePath + "/assets";
+                NSFileManager.defaultManager().createDirectoryAtPath_withIntermediateDirectories_attributes_error(this.assetsPath, true, nil, nil);
+
+                this.sliceCache[objectID] = layerData.exportable = this.getExportable(sliceLayer);
+                this.slices.push({
+                    name: layerData.name,
+                    objectID: objectID,
+                    rect: layerData.rect,
+                    exportable: layerData.exportable
+                });
+            } else if (this.sliceCache[objectID]) {
+                layerData.exportable = this.sliceCache[objectID];
+            }
+        }
+
+        return checkSlice;
+    }(),
+    checkSymbol: function () {
+        function checkSymbol(artboard, layer, layerData, data) {
+            if (layerData.type == "symbol") {
+                var self = this,
+                    symbolObjectID = this.toJSString(layer.symbolMaster().objectID());
+
+                layerData.objectID = symbolObjectID;
+
+                if (!self.hasExportSizes(layer.symbolMaster()) && layer.symbolMaster().children().count() > 1) {
+                    var symbolRect = this.getRect(layer),
+                        symbolChildren = layer.symbolMaster().children(),
+                        tempSymbol = layer.duplicate(),
+                        tempGroup = tempSymbol.detachByReplacingWithGroup(),
+                        tempGroupRect = this.getRect(tempGroup),
+                        tempSymbolLayers = tempGroup.children().objectEnumerator(),
+                        idx = 0;
+
+                    var tempArtboard = this.addShape();
+                    tempGroup.addLayers([tempArtboard]);
+                    var tempArtboardRect = this.getRect(tempArtboard),
+                        symbolMasterFrame = layer.symbolMaster().frame();
+
+                    tempArtboardRect.setX(symbolRect.x);
+                    tempArtboardRect.setY(symbolRect.y);
+                    tempArtboardRect.setWidth(symbolMasterFrame.width());
+                    tempArtboardRect.setHeight(symbolMasterFrame.height());
+
+                    tempGroup.resizeToFitChildrenWithOption(0);
+                    tempGroupRect.setX(symbolRect.x);
+                    tempGroupRect.setY(symbolRect.y);
+                    tempGroupRect.setWidth(symbolRect.width);
+                    tempGroupRect.setHeight(symbolRect.height);
+                    this.removeLayer(tempArtboard);
+
+                    while (tempSymbolLayer = tempSymbolLayers.nextObject()) {
+                        self.getLayer(artboard, tempSymbolLayer, data, symbolChildren[idx]);
+                        idx++;
+                    }
+                    this.removeLayer(tempGroup);
+                }
+            }
+        }
+
+        return checkSymbol;
+    }(),
+    upload: function () {
+        function upload(organizationID, projectID, context) {
+            console.log('upload invoked in qordoba-editor.js!');
+            var self = this,
+                savePath = NSTemporaryDirectory();
+            // log("Saving the reference at: " + savePath);
+
+            var hasArtboards = self.page.artboards().count() > 0;
+
+            this.selectionArtboards = this.page.artboards();
+            //self.message(_("Exporting..."));
+            var processingPanel = this.WebPanel({
+                url: this.pluginSketch + "/panel/processing.html",
+                width: 350,
+                height: 70,
+                floatWindow: true
+            }),
+                processing = processingPanel.windowScriptObject(),
+                template = NSString.stringWithContentsOfFile_encoding_error(this.pluginSketch + "/template.html", NSUTF8StringEncoding, nil);
+            //processing.evaluateWebScript("processing('"  + Math.round( 50 ) +  "%', '" + "Processing the files that will be" + "')");
+            //return;   
+            this.savePath = savePath;
+            var idx = 1;
+            var doc = self.document;
+            var currentPage = self.page;
+            var documentName = self.document.displayName().replace(/.sketch$/, "");
+            var pageName = currentPage.name;
+
+            var fileGenerated = false;
+            coscript.shouldKeepAround = true;
+
+            var filePath = false;
+            var fileId = false;
+            var geometryPath = false;
+            var error = false;
+            var processMessage = _("Intialization...");
+            coscript.scheduleWithRepeatingInterval_jsFunction(0, function (interval) {
+                // self.message('Processing layer ' + idx + ' of ' + self.allCount);
+                //Generate the source file
+                if (idx > 20 && filePath === false && fileId === false && geometryPath === false && !error) {
+                    // log("Generating the File.....");
+                    fileGenerated = true;
+                    processMessage = "Generating the source document..";
+                    processing.evaluateWebScript("processing('" + Math.round(idx) + "%', '" + processMessage + "')");
+                    var stringsAsJson = translate.generateLocaleForPage(currentPage);
+                    filePath = fileHelper.generateFile(context, stringsAsJson, pageName);
+                }
+
+                if (idx > 40 && filePath != false && fileId === false && geometryPath === false && !error) {
+                    processMessage = _("Uploading the source document..");
+                    processing.evaluateWebScript("processing('" + Math.round(idx) + "%', '" + processMessage + "')");
+                    //upload the file
+                    fileId = postFile(context, filePath, organizationID, projectID, documentName + " - " + pageName);
+                    if (fileId === false) {
+                        error = true;
+                    }
+                    utils.saveFileIdForPage(projectID, documentName, currentPage, fileId, self.context);
+                    // log("file id is: " + fileId)
+                }
+                if (idx > 70 && filePath != false && fileId != false && geometryPath === false && hasArtboards) {
+                    processMessage = _("Uploading the reference document..");
+                    processing.evaluateWebScript("processing('" + Math.round(idx) + "%', '" + processMessage + "')");
+                    var screenShotFile = fileHelper.exportPageToPng(context, currentPage);
+
+                    // log("screenShotFile file name: " + screenShotFile)
+
+                    geometryPath = self.specExport();
+                    if (geometryPath) {
+                        geometryPath = geometryPath + "index.html";
+                    }
+                    var reference_id = postReference(context, screenShotFile, geometryPath, organizationID, projectID, fileId.fileId, documentName + " - " + pageName);
+                    if (reference_id === false) {
+                        error = true;
+                    }
+                }
+
+                if (idx > 40 && filePath === false) {
+                    //upload the file
+                    coscript.shouldKeepAround = false;
+                    fireError("Error!", _("an error happened while genertaing source document, please try again."));
+                    return interval.cancel();
+                }
+
+                if (idx > 70 && fileId === false && geometryPath === false) {
+                    //upload the file
+                    coscript.shouldKeepAround = false;
+                    fireError("Error!", _("an error happened while uploading the document, please try again."));
+                    return interval.cancel();
+                }
+                //Handle the errors
+
+                idx++;
+                processing.evaluateWebScript("processing('" + Math.round(idx) + "%', '" + processMessage + "')");
+
+                if (idx > 100 && filePath != false && fileId != false && geometryPath != false) {
+                    coscript.shouldKeepAround = false;
+                    fireError("Success!", "Your page \"" + documentName + " - " + pageName + "\" has been uploaded to Qordoba.");
+                    return interval.cancel();
+                }
+
+                if (idx > 100 && filePath != false && fileId != false && geometryPath == false && !hasArtboards) {
+                    coscript.shouldKeepAround = false;
+                    fireError("Success!", "Your page \"" + documentName + " - " + pageName + "\" has been uploaded to Qordoba. \nNote: Qordoba couldn't upload the page preview because the selected page has no artboards!");
+                    return interval.cancel();
+                }
+            });
+        }
+
+        return upload;
+    }(),
+    specExport: function () {
+        function specExport() {
+            var self = this,
+                savePath = NSTemporaryDirectory();
+            // log("Saving the reference at: " + savePath);
+            this.selectionArtboards = this.page.artboards().slice(0, 5);
+            //self.message(_("Exporting..."));
+
+            this.savePath = savePath;
+            var artboardIndex = 0,
+                layerIndex = 0,
+                data = {
+                scale: self.configs.scale,
+                unit: self.configs.unit,
+                colorFormat: self.configs.colorFormat,
+                artboards: [],
+                slices: [],
+                colors: []
+            },
+                template = NSString.stringWithContentsOfFile_encoding_error(this.pluginSketch + "/template.html", NSUTF8StringEncoding, nil);
+
+            self.single = false;
+
+            //Generate artboards data
+            for (artboardIndex = 0; artboardIndex < this.selectionArtboards.length; artboardIndex++) {
+                // log("Export artboard num: " + artboardIndex);
+                if (!data.artboards[artboardIndex]) {
+                    data.artboards.push({ layers: [], notes: [] });
+                    self.maskCache = [];
+                    self.maskObjectID = undefined;
+                    self.maskRect = undefined;
+                }
+
+                var artboard = self.selectionArtboards[artboardIndex],
+                    page = artboard.parentGroup(),
+                    artboardChildrenLength = artboard.children().length;
+
+                for (layerIndex = 0; layerIndex < artboardChildrenLength; layerIndex++) {
+                    var layer = artboard.children()[layerIndex];
+                    self.getLayer(artboard, // Sketch artboard element
+                    layer, // Sketch layer element
+                    data.artboards[artboardIndex] // Save to data
+                    );
+                    if (self.is(layer, MSArtboardGroup)) {
+                        // log(layer);
+                        var objectID = artboard.objectID(),
+                            artboardRect = self.getRect(artboard),
+                            page = artboard.parentGroup(),
+                            name = self.toSlug(page.name() + ' ' + artboard.name());
+
+                        data.artboards[artboardIndex].pageName = self.toHTMLEncode(page.name());
+                        data.artboards[artboardIndex].pageObjectID = self.toJSString(page.objectID());
+                        data.artboards[artboardIndex].name = self.toHTMLEncode(artboard.name());
+                        data.artboards[artboardIndex].objectID = self.toJSString(artboard.objectID());
+                        data.artboards[artboardIndex].width = artboardRect.width;
+                        data.artboards[artboardIndex].height = artboardRect.height;
+                        // data.artboards[artboardIndex].imagePath = "preview/" + objectID + ".png";
+                        var imageURL = NSURL.fileURLWithPath(self.exportImage({
+                            layer: artboard,
+                            scale: 0.5,
+                            name: objectID
+                        })),
+                            imageData = NSData.dataWithContentsOfURL(imageURL),
+                            imageBase64 = imageData.base64EncodedStringWithOptions(0);
+                        data.artboards[artboardIndex].imageBase64 = 'data:image/png;base64,' + imageBase64;
+                    }
+                }
+            }
+
+            var selectingPath = savePath;
+            if (self.configs.exportOption) {
+                self.writeFile({
+                    content: self.template(template, { lang: language, data: JSON.stringify(data).replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029") }),
+                    path: self.toJSString(savePath),
+                    fileName: "index.html"
+                });
+                selectingPath = savePath + "/index.html";
+            }
+            //NSWorkspace.sharedWorkspace().activateFileViewerSelectingURLs(NSArray.arrayWithObjects(NSURL.fileURLWithPath(selectingPath)));
+            //self.message(_("Export complete!"));
+            return savePath;
+        }
+
+        return specExport;
+    }(),
+    writeFile: function () {
+        function writeFile(options) {
+            var options = this.extend(options, {
+                content: "Type something!",
+                path: this.toJSString(NSTemporaryDirectory()),
+                fileName: "temp.txt"
+            }),
+                content = NSString.stringWithString(options.content),
+                savePathName = [];
+
+            NSFileManager.defaultManager().createDirectoryAtPath_withIntermediateDirectories_attributes_error(options.path, true, nil, nil);
+
+            savePathName.push(options.path, "/", options.fileName);
+            savePathName = savePathName.join("");
+
+            content.writeToFile_atomically_encoding_error(savePathName, false, NSUTF8StringEncoding, null);
+        }
+
+        return writeFile;
+    }(),
+    exportImage: function () {
+        function exportImage(options) {
+            var options = this.extend(options, {
+                layer: this.artboard,
+                path: this.toJSString(NSTemporaryDirectory()),
+                scale: 1,
+                name: "preview",
+                suffix: "",
+                format: "png"
+            }),
+                document = this.document,
+                slice = MSExportRequest.exportRequestsFromExportableLayer(options.layer).firstObject(),
+                savePathName = [];
+
+            slice.scale = options.scale;
+            slice.format = options.format;
+
+            savePathName.push(options.path, "/", options.name, options.suffix, ".", options.format);
+            savePathName = savePathName.join("");
+
+            document.saveArtboardOrSlice_toFile(slice, savePathName);
+
+            return savePathName;
+        }
+
+        return exportImage;
+    }(),
+    getLayer: function () {
+        function getLayer(artboard, layer, data, symbolLayer) {
+            var artboardRect = artboard.absoluteRect(),
+                group = layer.parentGroup(),
+                layerStates = this.getStates(layer);
+
+            if (layer && this.is(layer, MSLayerGroup) && /NOTE\#/.exec(layer.name())) {
+                var textLayer = layer.children()[2];
+
+                data.notes.push({
+                    rect: this.rectToJSON(textLayer.absoluteRect(), artboardRect),
+                    note: this.toHTMLEncode(textLayer.stringValue()).replace(/\n/g, "<br>")
+                });
+
+                layer.setIsVisible(false);
+            }
+
+            if (!this.isExportable(layer) || !layerStates.isVisible || layerStates.isLocked && !this.is(layer, MSSliceLayer) || layerStates.isEmpty || layerStates.hasSlice || layerStates.isMeasure) {
+                return this;
+            }
+
+            var layerType = this.is(layer, MSTextLayer) ? "text" : this.is(layer, MSSymbolInstance) ? "symbol" : this.is(layer, MSSliceLayer) || this.hasExportSizes(layer) ? "slice" : "shape",
+                layerData = {
+                objectID: this.toJSString(layer.objectID()),
+                type: layerType,
+                name: this.toHTMLEncode(layer.name()),
+                rect: this.rectToJSON(layer.absoluteRect(), artboardRect)
+            };
+
+            if (symbolLayer) layerData.objectID = this.toJSString(symbolLayer.objectID());
+
+            if (!(layerType == "slice" || layerType == "symbol")) {
+                var layerStyle = layer.style();
+                layerData.rotation = layer.rotation();
+                layerData.radius = this.getRadius(layer);
+                layerData.borders = this.getBorders(layerStyle);
+                layerData.fills = this.getFills(layerStyle);
+                layerData.shadows = this.getShadows(layerStyle);
+                layerData.opacity = this.getOpacity(layerStyle);
+                layerData.styleName = this.getStyleName(layer);
+            }
+
+            if (layerType == "text") {
+                layerData.content = this.toHTMLEncode(layer.stringValue());
+                layerData.color = this.colorToJSON(layer.textColor());
+                layerData.fontSize = layer.fontSize();
+                layerData.fontFace = this.toJSString(layer.fontPostscriptName());
+                layerData.textAlign = TextAligns[layer.textAlignment()];
+                layerData.letterSpacing = this.toJSNumber(layer.characterSpacing());
+                layerData.lineHeight = layer.lineHeight();
+            }
+
+            var layerCSSAttributes = layer.CSSAttributes(),
+                css = [];
+
+            for (var i = 0; i < layerCSSAttributes.count(); i++) {
+                var c = layerCSSAttributes[i];
+                if (!/\/\*/.exec(c)) css.push(this.toJSString(c));
+            }
+            if (css.length > 0) layerData.css = css;
+
+            this.checkMask(group, layer, layerData, layerStates);
+            this.checkSlice(layer, layerData, symbolLayer);
+            data.layers.push(layerData);
+            this.checkSymbol(artboard, layer, layerData, data);
+        }
+
+        return getLayer;
+    }(),
+    template: function () {
+        function template(content, data) {
+            var content = content.replace(new RegExp("\\<\\!\\-\\-\\s([^\\s\\-\\-\\>]+)\\s\\-\\-\\>", "gi"), function ($0, $1) {
+                if ($1 in data) {
+                    return data[$1];
+                } else {
+                    return $0;
+                }
+            });
+            return content;
+        }
+
+        return template;
+    }(),
+    languageSettingsPanel: function () {
+        function languageSettingsPanel(context) {
+            var self = this,
+                data = {};
+
+            var languages = getLanguagesArray(context);
+            //var languageNames = utils.getNames(languages)
+
+            //utils.resetLanguageSettings(context);
+            data = {
+                languages: [],
+                fonts: [],
+                settings: utils.getLanguageSettings(context)
+            };
+            for (var i = 0; i < languages.count(); i++) {
+                data.languages.push({
+                    id: (languages[i].name + "").toLowerCase(),
+                    name: languages[i].name + ""
+                });
+            }
+            var doc = context.document;
+            var fontList = doc.documentData().fontList();
+            fontList.reloadFonts();
+            var fonts = fontList.allFonts();
+            for (var i = 0; i < fonts.count(); i++) {
+                data.fonts.push({
+                    id: (fonts[i] + "").toLowerCase(),
+                    name: fonts[i] + ""
+                });
+            }
+
+            return this.WebPanel({
+                url: this.pluginSketch + "/panel/language_settings.html",
+                width: 702,
+                height: 500,
+                data: data,
+                callback: function () {
+                    function callback(data) {
+                        // log("Final Data ***** ")
+                        // log(data)
+                        utils.saveLanguageSettings(data, context);
+                    }
+
+                    return callback;
+                }(),
+                titleBgColor: {
+                    r: 1,
+                    g: 1,
+                    b: 1,
+                    a: 1
+                },
+                contentBgColor: {
+                    r: 1,
+                    g: 1,
+                    b: 1,
+                    a: 1
+                },
+                hideClostButton: false
+            });
+        }
+
+        return languageSettingsPanel;
+    }()
+});
+
+exports["default"] = qordobaSDK;
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+
+/***/ }),
+/* 26 */
+/***/ (function(module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+//
+//  MochaJSDelegate.js
+//  MochaJSDelegate
+//
+//  Created by Matt Curtis
+//  Copyright (c) 2015. All rights reserved.
+//
+
+var MochaJSDelegate = function MochaJSDelegate(selectorHandlerDict) {
+	var uniqueClassName = "MochaJSDelegate_DynamicClass_" + NSUUID.UUID().UUIDString();
+
+	var delegateClassDesc = MOClassDescription.allocateDescriptionForClassWithName_superclass_(uniqueClassName, NSObject);
+
+	delegateClassDesc.registerClass();
+
+	//	Handler storage
+
+	var handlers = {};
+
+	//	Define interface
+
+	this.setHandlerForSelector = function (selectorString, func) {
+		var handlerHasBeenSet = selectorString in handlers;
+		var selector = NSSelectorFromString(selectorString);
+
+		handlers[selectorString] = func;
+
+		if (!handlerHasBeenSet) {
+			/*
+   	For some reason, Mocha acts weird about arguments:
+   	https://github.com/logancollins/Mocha/issues/28
+   		We have to basically create a dynamic handler with a likewise dynamic number of predefined arguments.
+   */
+
+			var dynamicHandler = function dynamicHandler() {
+				var functionToCall = handlers[selectorString];
+
+				if (!functionToCall) return;
+
+				return functionToCall.apply(delegateClassDesc, arguments);
+			};
+
+			var args = [],
+			    regex = /:/g;
+			while (match = regex.exec(selectorString)) {
+				args.push("arg" + args.length);
+			}dynamicFunction = eval("(function(" + args.join(",") + "){ return dynamicHandler.apply(this, arguments); })");
+
+			delegateClassDesc.addInstanceMethodWithSelector_function_(selector, dynamicFunction);
+		}
+	};
+
+	this.removeHandlerForSelector = function (selectorString) {
+		delete handlers[selectorString];
+	};
+
+	this.getHandlerForSelector = function (selectorString) {
+		return handlers[selectorString];
+	};
+
+	this.getAllHandlers = function () {
+		return handlers;
+	};
+
+	this.getClass = function () {
+		return NSClassFromString(uniqueClassName);
+	};
+
+	this.getClassInstance = function () {
+		return NSClassFromString(uniqueClassName)["new"]();
+	};
+
+	//	Conveience
+
+	if ((typeof selectorHandlerDict === "undefined" ? "undefined" : _typeof(selectorHandlerDict)) == "object") {
+		for (var selectorString in selectorHandlerDict) {
+			this.setHandlerForSelector(selectorString, selectorHandlerDict[selectorString]);
+		}
+	}
+};
+
+exports["default"] = MochaJSDelegate;
 
 /***/ })
 /******/ ]);
