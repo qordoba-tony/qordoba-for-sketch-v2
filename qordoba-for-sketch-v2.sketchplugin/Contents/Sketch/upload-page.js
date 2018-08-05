@@ -746,13 +746,13 @@ var _sketch = __webpack_require__(20);
 
 var _sketch2 = _interopRequireDefault(_sketch);
 
-var _controller = __webpack_require__(24);
+var _controller = __webpack_require__(21);
 
 var _controller2 = _interopRequireDefault(_controller);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-var UI = __webpack_require__(21);
+var UI = __webpack_require__(26);
 // console.log('loading upload-page.js!', controller);
 
 // function fetchProjects() {
@@ -2400,21 +2400,13 @@ module.exports = require("sketch");
 
 /***/ }),
 /* 21 */
-/***/ (function(module, exports) {
-
-module.exports = require("sketch/ui");
-
-/***/ }),
-/* 22 */,
-/* 23 */,
-/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(console) {Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
-var _qordobaEditor = __webpack_require__(25);
+var _qordobaEditor = __webpack_require__(22);
 
 var _qordobaEditor2 = _interopRequireDefault(_qordobaEditor);
 
@@ -2474,18 +2466,26 @@ exports['default'] = controller;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 25 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(console) {Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _MochaJSDelegate = __webpack_require__(26);
+var _MochaJSDelegate = __webpack_require__(23);
 
 var _MochaJSDelegate2 = _interopRequireDefault(_MochaJSDelegate);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+var _files = __webpack_require__(24);
+
+var _files2 = _interopRequireDefault(_files);
+
+var _utils = __webpack_require__(25);
+
+var _utils2 = _interopRequireDefault(_utils);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 console.log('loading qordoba-editor.js');
 
@@ -2595,7 +2595,7 @@ qordobaSDK.editor.extend({
     is: function () {
         function is(layer, theClass) {
             if (!layer) return false;
-            var klass = layer["class"]();
+            var klass = layer['class']();
             return klass === theClass;
         }
 
@@ -2603,7 +2603,7 @@ qordobaSDK.editor.extend({
     }(),
     addGroup: function () {
         function addGroup() {
-            return MSLayerGroup["new"]();
+            return MSLayerGroup['new']();
         }
 
         return addGroup;
@@ -2618,7 +2618,7 @@ qordobaSDK.editor.extend({
     }(),
     addText: function () {
         function addText(container) {
-            var text = MSTextLayer["new"]();
+            var text = MSTextLayer['new']();
             text.setStringValue("text");
             return text;
         }
@@ -2685,7 +2685,7 @@ qordobaSDK.editor.extend({
     }(),
     toHTMLEncode: function () {
         function toHTMLEncode(str) {
-            return this.toJSString(str).replace(/\&/g, "&amp;").replace(/\</g, "&lt;").replace(/\>/g, '&gt;').replace(/\'/g, "&#39;").replace(/\"/g, "&quot;").replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
+            return this.toJSString(str).replace(/\&/g, "&amp;").replace(/\</g, "&lt;").replace(/\>/g, '&gt;').replace(/\'/g, "&#39;").replace(/\"/g, "&quot;").replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029');
             // return str.replace(/\&/g, "&amp;").replace(/\"/g, "&quot;").replace(/\'/g, "&#39;").replace(/\</g, "&lt;").replace(/\>/g, '&gt;');
         }
 
@@ -2977,7 +2977,7 @@ qordobaSDK.editor.extend({
                 container = container || this.current,
                 items;
 
-            if (container["class"] && container["class"]() == __NSArrayI) {
+            if (container['class'] && container['class']() == __NSArrayI) {
                 items = container;
             } else if (container.pages) {
                 items = container.pages();
@@ -3079,7 +3079,7 @@ qordobaSDK.editor.extend({
             var contentView = Panel.contentView(),
                 webView = WebView.alloc().initWithFrame(NSMakeRect(0, 0, options.width, options.height)),
                 windowObject = webView.windowScriptObject(),
-                delegate = new _MochaJSDelegate2["default"]({
+                delegate = new _MochaJSDelegate2['default']({
                 "webView:didFinishLoadForFrame:": function () {
                     function webViewDidFinishLoadForFrame(webView, webFrame) {
                         var WebAction = ["function WebAction(data){", "window.SMData = encodeURI(JSON.stringify(data));", "window.location.hash = 'submit';",
@@ -3443,25 +3443,32 @@ qordobaSDK.editor.extend({
             // log("Saving the reference at: " + savePath);
 
             var hasArtboards = self.page.artboards().count() > 0;
+            console.log('hasArtboards', hasArtboards);
 
             this.selectionArtboards = this.page.artboards();
+            console.log('this.selectionArtboards', this.selectionArtboards);
+            console.log('this.pluginSketch', this.pluginSketch);
             //self.message(_("Exporting..."));
-            var processingPanel = this.WebPanel({
-                url: this.pluginSketch + "/panel/processing.html",
-                width: 350,
-                height: 70,
-                floatWindow: true
-            }),
-                processing = processingPanel.windowScriptObject(),
-                template = NSString.stringWithContentsOfFile_encoding_error(this.pluginSketch + "/template.html", NSUTF8StringEncoding, nil);
+            // var processingPanel = this.WebPanel({
+            //         url: this.pluginSketch + "/panel/processing.html",
+            //         width: 350,
+            //         height: 70,
+            //         floatWindow: true
+            //     })
+            //    console.log('processingPanel', processingPanel);
+            //     processing = processingPanel.windowScriptObject()
+            //     template = NSString.stringWithContentsOfFile_encoding_error(this.pluginSketch + "/template.html", NSUTF8StringEncoding, null);
             //processing.evaluateWebScript("processing('"  + Math.round( 50 ) +  "%', '" + "Processing the files that will be" + "')");
-            //return;   
+            //return;
+
+
             this.savePath = savePath;
             var idx = 1;
             var doc = self.document;
             var currentPage = self.page;
             var documentName = self.document.displayName().replace(/.sketch$/, "");
             var pageName = currentPage.name;
+            console.log('1');
 
             var fileGenerated = false;
             coscript.shouldKeepAround = true;
@@ -3471,6 +3478,7 @@ qordobaSDK.editor.extend({
             var geometryPath = false;
             var error = false;
             var processMessage = _("Intialization...");
+            console.log('2');
             coscript.scheduleWithRepeatingInterval_jsFunction(0, function (interval) {
                 // self.message('Processing layer ' + idx + ' of ' + self.allCount);
                 //Generate the source file
@@ -3480,8 +3488,9 @@ qordobaSDK.editor.extend({
                     processMessage = "Generating the source document..";
                     processing.evaluateWebScript("processing('" + Math.round(idx) + "%', '" + processMessage + "')");
                     var stringsAsJson = translate.generateLocaleForPage(currentPage);
-                    filePath = fileHelper.generateFile(context, stringsAsJson, pageName);
+                    filePath = _files2['default'].generateFile(context, stringsAsJson, pageName);
                 }
+                console.log('3');
 
                 if (idx > 40 && filePath != false && fileId === false && geometryPath === false && !error) {
                     processMessage = _("Uploading the source document..");
@@ -3491,13 +3500,13 @@ qordobaSDK.editor.extend({
                     if (fileId === false) {
                         error = true;
                     }
-                    utils.saveFileIdForPage(projectID, documentName, currentPage, fileId, self.context);
+                    _utils2['default'].saveFileIdForPage(projectID, documentName, currentPage, fileId, self.context);
                     // log("file id is: " + fileId)
                 }
                 if (idx > 70 && filePath != false && fileId != false && geometryPath === false && hasArtboards) {
                     processMessage = _("Uploading the reference document..");
                     processing.evaluateWebScript("processing('" + Math.round(idx) + "%', '" + processMessage + "')");
-                    var screenShotFile = fileHelper.exportPageToPng(context, currentPage);
+                    var screenShotFile = _files2['default'].exportPageToPng(context, currentPage);
 
                     // log("screenShotFile file name: " + screenShotFile)
 
@@ -3617,7 +3626,7 @@ qordobaSDK.editor.extend({
             var selectingPath = savePath;
             if (self.configs.exportOption) {
                 self.writeFile({
-                    content: self.template(template, { lang: language, data: JSON.stringify(data).replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029") }),
+                    content: self.template(template, { lang: language, data: JSON.stringify(data).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') }),
                     path: self.toJSString(savePath),
                     fileName: "index.html"
                 });
@@ -3772,7 +3781,7 @@ qordobaSDK.editor.extend({
             data = {
                 languages: [],
                 fonts: [],
-                settings: utils.getLanguageSettings(context)
+                settings: _utils2['default'].getLanguageSettings(context)
             };
             for (var i = 0; i < languages.count(); i++) {
                 data.languages.push({
@@ -3800,7 +3809,7 @@ qordobaSDK.editor.extend({
                     function callback(data) {
                         // log("Final Data ***** ")
                         // log(data)
-                        utils.saveLanguageSettings(data, context);
+                        _utils2['default'].saveLanguageSettings(data, context);
                     }
 
                     return callback;
@@ -3825,11 +3834,11 @@ qordobaSDK.editor.extend({
     }()
 });
 
-exports["default"] = qordobaSDK;
+exports['default'] = qordobaSDK;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 26 */
+/* 23 */
 /***/ (function(module, exports) {
 
 Object.defineProperty(exports, "__esModule", {
@@ -3920,6 +3929,255 @@ var MochaJSDelegate = function MochaJSDelegate(selectorHandlerDict) {
 };
 
 exports["default"] = MochaJSDelegate;
+
+/***/ }),
+/* 24 */
+/***/ (function(module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+var fileHelper = {
+	createFolderAtPath: function () {
+		function createFolderAtPath(context, pathString) {
+			var fileManager = NSFileManager.defaultManager;
+			if (fileManager.fileExistsAtPath(pathString)) {
+				return true;
+			} else {
+				// return [fileManager createDirectoryAtPath:pathString withIntermediateDirectories:true attributes:nil error:nil]
+				return fileManager.createDirectoryAtPath(pathString, true, null, null);
+			}
+		}
+
+		return createFolderAtPath;
+	}(),
+
+	readTextFromFile: function () {
+		function readTextFromFile(context, filePath) {
+			// var fileManager = [NSFileManager defaultManager]
+			var fileManager = NSFileManager.defaultManager;
+			// if([fileManager fileExistsAtPath:filePath]) {
+			if (fileManager.fileExistsAtPath(filePath)) {
+				// var log = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:nil];
+				var log = NSString.stringWithContentsOfFile(filePath, NSUTF8StringEncoding, null);
+				if (log) {
+					return log;
+				}
+				NSLog("Could not get log file data");
+				return false;
+			}
+			return false;
+		}
+
+		return readTextFromFile;
+	}(),
+
+	removeFileOrFolder: function () {
+		function removeFileOrFolder(filePath) {
+			// [[NSFileManager defaultManager] removeItemAtPath:filePath error:nil];
+			NSFileManager.defaultManager.removeItemAtPath(filePath, null);
+		}
+
+		return removeFileOrFolder;
+	}(),
+
+	exportPageToPng: function () {
+		function exportPageToPng(context, page) {
+			if (!context) {
+				NSLog("No context and text was provided for log");
+				return false;
+			}
+
+			if (!page) {
+				NSLog("No text was provided for log");
+				return false;
+			}
+
+			var doc = context.document;
+			// var frame = [page contentBounds];
+			var frame = page.contentBounds;
+			// var fileName = [page name];
+			var fileName = page.name;
+			// var exportRequest = [MSExportRequest new]
+			var exportRequest = new MSExportRequest();
+			//exportRequest.rect  = frame;
+			var tmpPath = NSTemporaryDirectory();
+			var fileName = fileName.replace(/[^a-z0-9]/gi, '_').toLowerCase() + ".png";
+			//just remove the file to make sure
+			this.removeFile(tmpPath + fileName, context);
+
+			if (frame.size.width <= 10000 || frame.size.height <= 10000) {
+				exportRequest.rect = frame;
+			} else if (page.artboards().count() > 0) {
+				//get the first artboards
+				var layer = page.artboards().firstObject();
+				exportRequest = MSExportRequest.exportRequestsFromExportableLayer(layer).firstObject();
+			} else {
+				var layers = page.containedLayers();
+				var layer = null;
+				for (var i = 0; i < layers.count(); i++) {
+					if (layers[i].isVisible() && layers[i]["class"]() == MSLayerGroup) {
+						layer = layers[i];
+						break;
+					}
+				}
+
+				exportRequest.rect = layer.absoluteRect(); //CGRectMake(layer.absoluteRect().x, layer.absoluteRect().y, 10000,10000);
+			}
+
+			exportRequest.scale = 1;
+			if (this.createFolderAtPath(context, tmpPath)) {
+				var filePath = tmpPath + fileName;
+				doc.saveArtboardOrSlice_toFile(exportRequest, filePath);
+				return filePath;
+			} else {
+				NSLog("Unable to create forlder at " + tmpPath + fileName);
+				return false;
+			}
+		}
+
+		return exportPageToPng;
+	}(),
+	writeStringToFile: function () {
+		function writeStringToFile(context, text, filePath) {
+			var aFileHandle;
+			var aFile;
+			var t;
+			// t = [NSString stringWithFormat:@"%@", text],
+			t = NSString.stringWithFormat("%@", text),
+			// aFile = [NSString stringWithFormat:"%@", filePath]
+			aFile = NSString.stringWithFormat("%@", filePath);
+
+			// aFileHandle = [NSFileHandle fileHandleForWritingAtPath:aFile]
+			aFileHandle = NSFileHandle.fileHandleForWritingAtPath(aFile);
+
+			if (aFileHandle) {
+				// [aFileHandle truncateFileAtOffset:[aFileHandle seekToEndOfFile]]
+				// [aFileHandle writeData:[t dataUsingEncoding:NSUTF8StringEncoding]]
+				aFileHandle.truncateFileAtOffset(aFileHandle.seekToEndOfFile());
+				aFileHandle.writeData(t.dataUsingEncoding(NSUTF8StringEncoding));
+			} else {
+				// [t writeToFile:aFile atomically:true encoding:NSUTF8StringEncoding error:nil]
+				t.writeToFile(aFile, true, NSUTF8StringEncoding, null);
+			}
+		}
+
+		return writeStringToFile;
+	}(),
+
+	generateFile: function () {
+		function generateFile(context, text, fileName) {
+			if (!context) {
+				if (text) {
+					NSLog("No context was provided for log : " + text);
+				} else {
+					NSLog("No context and text was provided for log");
+				}
+
+				return false;
+			}
+
+			if (!text) {
+				NSLog("No text was provided for log");
+				return false;
+			}
+
+			var tmpPath = NSTemporaryDirectory();
+			var fileName = fileName.replace(/[^a-z0-9]/gi, '_').toLowerCase() + ".csv";
+			//just remove the file to make sure
+			this.removeFile(tmpPath + fileName, context);
+
+			if (this.createFolderAtPath(context, tmpPath)) {
+				this.writeStringToFile(context, text, tmpPath + fileName);
+				return tmpPath + fileName;
+			}
+		}
+
+		return generateFile;
+	}(),
+
+	getTmpDirectory: function () {
+		function getTmpDirectory(context) {
+			return NSTemporaryDirectory();
+		}
+
+		return getTmpDirectory;
+	}(),
+
+	getCurrentTime: function () {
+		function getCurrentTime() {
+			// var DateFormatter=[[NSDateFormatter alloc] init]
+			var DateFormatter = NSDateFormatter.alloc().init();
+			DateFormatter.setDateFormat("yyyy-MM-dd hh:mm:ss");
+			// return [DateFormatter stringFromDate:[NSDate date]]
+			return DateFormatter.stringFromDate(NSDate.date);
+		}
+
+		return getCurrentTime;
+	}(),
+	copyFile: function () {
+		function copyFile(srcPath, dstPath, context) {
+			//just remove the file, in case it's there
+			this.removeFile(dstPath, context);
+			// return [[NSFileManager defaultManager] copyItemAtPath:srcPath toPath:dstPath error:nil];
+			return NSFileManager.defaultManager.copyItemAtPath(srcPath, dstPath, null);
+		}
+
+		return copyFile;
+	}(),
+	removeFile: function () {
+		function removeFile(filePath, context) {
+			// return [[NSFileManager defaultManager] removeItemAtPath:filePath error:nil];
+			return NSFileManager.defaultManager.removeItemAtPath(filePath, null);
+		}
+
+		return removeFile;
+	}(),
+	csvToJson: function () {
+		function csvToJson(csv) {
+			var str = csv;
+			var regexp = /([\s\S]*?):q:q:q:q:s:([\s\S]*?):q:q:q:q:e:/gm;
+			//var regexp = /^([\s\S]*?):q:q:q:q:m:([\s\S]*?)$/gm;
+			var jsonObj = {};
+			var matches_array = str.replace(regexp, function (match, key, val) {
+				//key = key.replace(/^\n/, '');
+				jsonObj[key] = val;
+			});
+			return jsonObj;
+		}
+
+		return csvToJson;
+	}(),
+	jsonToCsv: function () {
+		function jsonToCsv(json) {
+			var seperator = ":q:q:q:q:s:";
+			var endOfLine = ":q:q:q:q:e:";
+			var str = "";
+			for (var key in json) {
+				if (json.hasOwnProperty(key)) {
+					str += key + seperator + json[key] + endOfLine;
+				}
+			}
+			return str;
+		}
+
+		return jsonToCsv;
+	}()
+};
+
+exports["default"] = fileHelper;
+
+/***/ }),
+/* 25 */
+/***/ (function(module, exports) {
+
+throw new Error("Module build failed: SyntaxError: Unexpected token, expected , (123:95)\n\n\u001b[0m \u001b[90m 121 | \u001b[39m    \u001b[90m// [[NSUserDefaults standardUserDefaults] removeObjectForKey:@\"QUSER_qordoba_user_name\" + \"_\" + qordobaSDK.common.version];\u001b[39m\n \u001b[90m 122 | \u001b[39m    \u001b[90m// [[NSUserDefaults standardUserDefaults] removeObjectForKey:@\"QUSER_qordoba_user_email\" + \"_\" + qordobaSDK.common.version];\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 123 | \u001b[39m    \u001b[33mNSUserDefaults\u001b[39m\u001b[33m.\u001b[39mstandardUserDefaults(\u001b[32m\"QUSER_qordoba_token\"\u001b[39m \u001b[33m+\u001b[39m \u001b[32m\"_\"\u001b[39m \u001b[33m+\u001b[39m qordobaSDK\u001b[33m.\u001b[39mcommon\u001b[33m.\u001b[39mversion\u001b[33m;\u001b[39m)\n \u001b[90m     | \u001b[39m                                                                                               \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 124 | \u001b[39m    \u001b[33mNSUserDefaults\u001b[39m\u001b[33m.\u001b[39mstandardUserDefaults(\u001b[32m\"QUSER_qordoba_user_id\"\u001b[39m \u001b[33m+\u001b[39m \u001b[32m\"_\"\u001b[39m \u001b[33m+\u001b[39m qordobaSDK\u001b[33m.\u001b[39mcommon\u001b[33m.\u001b[39mversion\u001b[33m;\u001b[39m)\n \u001b[90m 125 | \u001b[39m    \u001b[33mNSUserDefaults\u001b[39m\u001b[33m.\u001b[39mstandardUserDefaults(\u001b[32m\"QUSER_qordoba_user_name\"\u001b[39m \u001b[33m+\u001b[39m \u001b[32m\"_\"\u001b[39m \u001b[33m+\u001b[39m qordobaSDK\u001b[33m.\u001b[39mcommon\u001b[33m.\u001b[39mversion\u001b[33m;\u001b[39m)\n \u001b[90m 126 | \u001b[39m    \u001b[33mNSUserDefaults\u001b[39m\u001b[33m.\u001b[39mstandardUserDefaults(\u001b[32m\"QUSER_qordoba_user_email\"\u001b[39m \u001b[33m+\u001b[39m \u001b[32m\"_\"\u001b[39m \u001b[33m+\u001b[39m qordobaSDK\u001b[33m.\u001b[39mcommon\u001b[33m.\u001b[39mversion\u001b[33m;\u001b[39m)\u001b[0m\n");
+
+/***/ }),
+/* 26 */
+/***/ (function(module, exports) {
+
+module.exports = require("sketch/ui");
 
 /***/ })
 /******/ ]);

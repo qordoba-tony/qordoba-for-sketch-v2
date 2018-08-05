@@ -1,4 +1,6 @@
 import MochaJSDelegate from "./framework-utils/MochaJSDelegate";
+import fileHelper from './files';
+import utils from './utils';
 console.log('loading qordoba-editor.js');
 
 
@@ -840,25 +842,32 @@ qordobaSDK.editor.extend({
         // log("Saving the reference at: " + savePath);
 
         var hasArtboards = (self.page.artboards().count() > 0)
+        console.log('hasArtboards', hasArtboards);
         
         this.selectionArtboards  = this.page.artboards();
+        console.log('this.selectionArtboards', this.selectionArtboards);
+        console.log('this.pluginSketch', this.pluginSketch);
         //self.message(_("Exporting..."));
-	    var processingPanel = this.WebPanel({
-	            url: this.pluginSketch + "/panel/processing.html",
-	            width: 350,
-	            height: 70,
-	            floatWindow: true
-	        }),
-	        processing = processingPanel.windowScriptObject(),
-	        template = NSString.stringWithContentsOfFile_encoding_error(this.pluginSketch + "/template.html", NSUTF8StringEncoding, nil);
+	    // var processingPanel = this.WebPanel({
+	    //         url: this.pluginSketch + "/panel/processing.html",
+	    //         width: 350,
+	    //         height: 70,
+	    //         floatWindow: true
+	    //     })
+     //    console.log('processingPanel', processingPanel);
+	    //     processing = processingPanel.windowScriptObject()
+	    //     template = NSString.stringWithContentsOfFile_encoding_error(this.pluginSketch + "/template.html", NSUTF8StringEncoding, null);
             //processing.evaluateWebScript("processing('"  + Math.round( 50 ) +  "%', '" + "Processing the files that will be" + "')");
-         //return;   
+         //return;
+
+         
 	    this.savePath = savePath;
 	    var idx = 1;
 		var doc = self.document
 		var currentPage = self.page;
 		var documentName = self.document.displayName().replace(/.sketch$/,"");
 		var pageName = currentPage.name
+        console.log('1');
 		
 		var fileGenerated = false;
 	    coscript.shouldKeepAround = true
@@ -868,6 +877,7 @@ qordobaSDK.editor.extend({
         var geometryPath = false;
         var error = false;
         var processMessage = _("Intialization...");
+        console.log('2');
 	    coscript.scheduleWithRepeatingInterval_jsFunction( 0, function( interval ){
 	        // self.message('Processing layer ' + idx + ' of ' + self.allCount);
             //Generate the source file
@@ -879,6 +889,7 @@ qordobaSDK.editor.extend({
 	        	var stringsAsJson = translate.generateLocaleForPage(currentPage)
 	        	filePath = fileHelper.generateFile(context,stringsAsJson,pageName)
 	        }
+            console.log('3');
 
             if(idx > 40 && filePath != false && fileId === false && geometryPath === false && !error){
                 processMessage = _("Uploading the source document..");
