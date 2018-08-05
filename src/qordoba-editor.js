@@ -854,6 +854,8 @@ qordobaSDK.editor.extend({
 	    //         height: 70,
 	    //         floatWindow: true
 	    //     })
+        const processingPanel = this.WebPanel();
+        console.log('processingPanel', processingPanel);
      //    console.log('processingPanel', processingPanel);
 	    //     processing = processingPanel.windowScriptObject()
 	    //     template = NSString.stringWithContentsOfFile_encoding_error(this.pluginSketch + "/template.html", NSUTF8StringEncoding, null);
@@ -867,7 +869,7 @@ qordobaSDK.editor.extend({
 		var currentPage = self.page;
 		var documentName = self.document.displayName().replace(/.sketch$/,"");
 		var pageName = currentPage.name
-        console.log('1');
+        // console.log('1', coscript);
 		
 		var fileGenerated = false;
 	    coscript.shouldKeepAround = true
@@ -883,6 +885,7 @@ qordobaSDK.editor.extend({
             //Generate the source file
 	        if(idx > 20 && filePath === false && fileId === false && geometryPath === false && !error){
                 // log("Generating the File.....");
+                console.log('generating file!', indx);
                 fileGenerated = true;
                 processMessage = "Generating the source document.."
 	        	processing.evaluateWebScript("processing('"  + Math.round( idx ) +  "%', '" + processMessage + "')");
@@ -902,6 +905,7 @@ qordobaSDK.editor.extend({
                 utils.saveFileIdForPage(projectID,documentName,currentPage,fileId,self.context)
                 // log("file id is: " + fileId)
             }
+            console.log('4');
             if(idx > 70 && filePath != false && fileId != false && geometryPath === false && hasArtboards){
                 processMessage = _("Uploading the reference document..");
                 processing.evaluateWebScript("processing('"  + Math.round( idx ) +  "%', '" + processMessage + "')");
@@ -919,6 +923,7 @@ qordobaSDK.editor.extend({
                 }
 
             }
+            console.log('5');
             
             if(idx > 40 && filePath === false){
                 //upload the file
@@ -926,6 +931,7 @@ qordobaSDK.editor.extend({
                 fireError("Error!", _("an error happened while genertaing source document, please try again."));
                 return interval.cancel();
             }
+            console.log('6');
 
             if(idx > 70 && fileId === false && geometryPath === false){
                 //upload the file
@@ -933,13 +939,16 @@ qordobaSDK.editor.extend({
                 fireError("Error!", _("an error happened while uploading the document, please try again."));
                 return interval.cancel();
             }
+            console.log('7');
             //Handle the errors
 
             idx++;
-            processing.evaluateWebScript("processing('"  + Math.round( idx ) +  "%', '" + processMessage + "')");
+            // processing.evaluateWebScript("processing('"  + Math.round( idx ) +  "%', '" + processMessage + "')");
+            console.log('do we reach here?');
             
             if( idx >100 && filePath != false && fileId != false && geometryPath != false){
 	            coscript.shouldKeepAround = false;
+                console.log('Uploading to Qordoba');
                 fireError("Success!", "Your page \""+documentName + " - "+ pageName+"\" has been uploaded to Qordoba.")       
 	            return interval.cancel();
 	        }
