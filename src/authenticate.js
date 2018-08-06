@@ -3,6 +3,7 @@ import fetch from 'sketch-polyfill-fetch';
 import qordobaSDK from './api';
 import Rollbar from 'rollbar';
 import sketch from 'sketch';
+import { loginWithUsernameAndPassword } from './qordoba-api';
 
 const UI = require('sketch/ui');
 console.log('loading authenticate.js');
@@ -27,46 +28,46 @@ export default function(context) {
 
   const webContents = browserWindow.webContents;
 
-  function fetchProjects() {
-    console.log('fetchProjects invoked from authenticate.js!!!!');
-    const orgId = String(sketch.Settings.settingForKey('organizations')[0].id);
-    console.log('orgId', orgId);
-    const token = sketch.Settings.settingForKey('token');
-    const username = sketch.Settings.settingForKey('username');
-    const fetchProjectsURL = `https://app.qordoba.com/api/organizations/${orgId}/projects/by_type/7`;
-    fetch(fetchProjectsURL, {
-      method: 'GET',
-      headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'sketch',
-          'X-AUTH-TOKEN': token
-      }
-    })
-      .then(response => {
-        console.log('response', JSON.stringify(response));
-        if (response.status === 200) {
-          response.json()
-            .then(data => {
-              console.log('data', JSON.stringify(data));
-              const projects = data.projects;
-              console.log('projects', JSON.stringify(projects));
-              console.log('projects.length', projects.length);
-              webContents.executeJavaScript(`logInfoToRollbar("${username}", "Request to fetch projects from Qordoba successful.")`);
-              setProjectsIntoState(projects);
-            })
-        } else {
-          console.log('fetchProjects failed', username);
-          response.json()
-            .then(data => {
-              console.log('data', data);
-            });
-          webContents.executeJavaScript(`logErrorToRollbar("${username}", "Request to fetch projects from Qordoba unsuccessful")`);
-        }
-      })
-      // .catch(error => {
-      //   console.log('fetchProjects catch statement', error);
-      // })
-  }
+  // function fetchProjects() {
+  //   console.log('fetchProjects invoked from authenticate.js!!!!');
+  //   const orgId = String(sketch.Settings.settingForKey('organizations')[0].id);
+  //   console.log('orgId', orgId);
+  //   const token = sketch.Settings.settingForKey('token');
+  //   const username = sketch.Settings.settingForKey('username');
+  //   const fetchProjectsURL = `https://app.qordoba.com/api/organizations/${orgId}/projects/by_type/7`;
+  //   fetch(fetchProjectsURL, {
+  //     method: 'GET',
+  //     headers: {
+  //         'Content-Type': 'application/json',
+  //         'User-Agent': 'sketch',
+  //         'X-AUTH-TOKEN': token
+  //     }
+  //   })
+  //     .then(response => {
+  //       console.log('response', JSON.stringify(response));
+  //       if (response.status === 200) {
+  //         response.json()
+  //           .then(data => {
+  //             console.log('data', JSON.stringify(data));
+  //             const projects = data.projects;
+  //             console.log('projects', JSON.stringify(projects));
+  //             console.log('projects.length', projects.length);
+  //             webContents.executeJavaScript(`logInfoToRollbar("${username}", "Request to fetch projects from Qordoba successful.")`);
+  //             setProjectsIntoState(projects);
+  //           })
+  //       } else {
+  //         console.log('fetchProjects failed', username);
+  //         response.json()
+  //           .then(data => {
+  //             console.log('data', data);
+  //           });
+  //         webContents.executeJavaScript(`logErrorToRollbar("${username}", "Request to fetch projects from Qordoba unsuccessful")`);
+  //       }
+  //     })
+  //     // .catch(error => {
+  //     //   console.log('fetchProjects catch statement', error);
+  //     // })
+  // }
 
   function setProjectsIntoState(projects) {
     console.log('setProjectsIntoState invoked!');
@@ -101,30 +102,31 @@ export default function(context) {
   // add a handler for a call from web content's javascript
   webContents.on('login', (s, username, password) => {
     UI.message(s);
-    fetch('https://app.qordoba.com/api/login', {
-      method: 'PUT',
-      body: JSON.stringify({
-        username: username,
-        password: password
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'sketch'
-      }
-    })
-      .then((res) => {
-        console.log('res', JSON.stringify(res));
-        if (res.status === 200) {
-          res.json().then(data => {
-            const name = data.loggedUser.name;
-            webContents.executeJavaScript(`logInfoToRollbar("${name}", "Login successful")`);
-            browserWindow.close();
-            setUserInfo(data);
-          });
-        } else {
-          webContents.executeJavaScript(`logErrorToRollbar("${username}", "Login unsuccessful")`);
-        }
-      })
+    // fetch('https://app.qordoba.com/api/login', {
+    //   method: 'PUT',
+    //   body: JSON.stringify({
+    //     username: username,
+    //     password: password
+    //   }),
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'User-Agent': 'sketch'
+    //   }
+    // })
+    //   .then((res) => {
+    //     console.log('res', JSON.stringify(res));
+    //     if (res.status === 200) {
+    //       res.json().then(data => {
+    //         const name = data.loggedUser.name;
+    //         webContents.executeJavaScript(`logInfoToRollbar("${name}", "Login successful")`);
+    //         browserWindow.close();
+    //         setUserInfo(data);
+    //       });
+    //     } else {
+    //       webContents.executeJavaScript(`logErrorToRollbar("${username}", "Login unsuccessful")`);
+    //     }
+    //   })
+    loginWithUsernameAndPassword(username, password, context, browserWindow, webContents);
   });
 
   webContents.on('logout', () => {

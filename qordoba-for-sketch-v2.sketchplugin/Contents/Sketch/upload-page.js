@@ -4178,242 +4178,184 @@ exports["default"] = fileHelper;
 
 /***/ }),
 /* 25 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-/* WEBPACK VAR INJECTION */(function(console) {Object.defineProperty(exports, "__esModule", {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
-console.log('loading utils.js');
 var utils = utils || {};
 utils = {
-  "getPageId": function () {
-    function getPageId(page) {
-      var string = page.toString();
-      // var openRange = [string rangeOfString:@"("]
-      // var closeRange = [string rangeOfString:@")"]
-      var openRange = string.rangeOfString("(");
-      var closeRange = string.rangeOfString(")");
-      var length = closeRange.location - openRange.location - 1;
-      // return [[string substringFromIndex:NSMaxRange(openRange)] substringToIndex:length]
-      return string.substringFromIndex(NSMaxRange(openRange)).substringToIndex(length);
-    }
+  // "getPageId" : function(page){
+  //   var string = page.toString()
+  //   // var openRange = [string rangeOfString:@"("]
+  //   // var closeRange = [string rangeOfString:@")"]
+  //   var openRange = string.rangeOfString("(")
+  //   var closeRange = string.rangeOfString(")")
+  //   var length = closeRange.location - openRange.location -1
+  //   // return [[string substringFromIndex:NSMaxRange(openRange)] substringToIndex:length]
+  //   return string.substringFromIndex(NSMaxRange(openRange)).substringToIndex(length)
+  // },
 
-    return getPageId;
-  }(),
+  // "isRetinaDisplay": function(){
+  //   return NSScreen.isOnRetinaScreen();
+  // },
 
-  "isRetinaDisplay": function () {
-    function isRetinaDisplay() {
-      return NSScreen.isOnRetinaScreen();
-    }
+  // "escapedFileName": function(string){
+  //   // var notAllowedChars = [NSCharacterSet characterSetWithCharactersInString:@"\\<>=,!#$&'()*+/:;=?@[]%"];
+  //   // var cleanString = [[string componentsSeparatedByCharactersInSet:notAllowedChars] componentsJoinedByString:@""];
+  //   var notAllowedChars = NSCharacterSet.characterSetWithCharactersInString("\\<>=,!#$&'()*+/:;=?@[]%");
+  //   var cleanString = string.componentsSeparatedByCharactersInSet.notAllowedChars().componentsJoinedByString("");
+  //   return cleanString
+  // },
 
-    return isRetinaDisplay;
-  }(),
+  // "createLabel": function(text, rect) {
+  //   // var label = [[NSTextField alloc] initWithFrame:rect]
+  //   var label = NSTextField.alloc().initWithFrame(rect)
+  //   label.stringValue = text
+  //   label.editable = false
+  //   label.borderd = false
+  //   label.bezeled = false
+  //   label.setAlignment(1)
+  //   label.useSingleLineMode = true
+  //   label.drawsBackground = false
+  //   return label
+  // },
 
-  "escapedFileName": function () {
-    function escapedFileName(string) {
-      // var notAllowedChars = [NSCharacterSet characterSetWithCharactersInString:@"\\<>=,!#$&'()*+/:;=?@[]%"];
-      // var cleanString = [[string componentsSeparatedByCharactersInSet:notAllowedChars] componentsJoinedByString:@""];
-      var notAllowedChars = NSCharacterSet.characterSetWithCharactersInString("\\<>=,!#$&'()*+/:;=?@[]%");
-      var cleanString = string.componentsSeparatedByCharactersInSet.notAllowedChars().componentsJoinedByString("");
-      return cleanString;
-    }
+  // "getNames" : function(objs){
+  //     var arr = []
+  //     for (i = 0; i < objs.length; ++i) {
+  //         arr.push(objs[i].name);
+  //     }
+  //     return arr;
+  //   },
 
-    return escapedFileName;
-  }(),
-
-  "createLabel": function () {
-    function createLabel(text, rect) {
-      // var label = [[NSTextField alloc] initWithFrame:rect]
-      var label = NSTextField.alloc().initWithFrame(rect);
-      label.stringValue = text;
-      label.editable = false;
-      label.borderd = false;
-      label.bezeled = false;
-      label.setAlignment(1);
-      label.useSingleLineMode = true;
-      label.drawsBackground = false;
-      return label;
-    }
-
-    return createLabel;
-  }(),
-
-  "getNames": function () {
-    function getNames(objs) {
-      var arr = [];
-      for (i = 0; i < objs.length; ++i) {
-        arr.push(objs[i].name);
-      }
-      return arr;
-    }
-
-    return getNames;
-  }(),
-
-  "getArrayNames": function () {
-    function getArrayNames(objs) {
-      var arr = [];
-      for (i = 0; i < objs.length; ++i) {
-        arr.push(objs[i].name);
-      }
-      return arr;
-    }
-
-    return getArrayNames;
-  }(),
-  "getIndexOfArray": function () {
-    function getIndexOfArray(objs, name) {
-      var index = 0;
-      for (i = 0; i < objs.length; ++i) {
-        if (name == objs[i]) {
-          index = i;
-          return index;
-        }
-      }
-      return index;
-    }
-
-    return getIndexOfArray;
-  }(),
-  "getIndexOf": function () {
-    function getIndexOf(objs, name) {
-      var index = 0;
-      for (i = 0; i < objs.length; ++i) {
-        if (name == objs[i]) {
-          index = i;
-          return index;
-        }
-      }
-      return index;
-    }
-
-    return getIndexOf;
-  }(),
+  // "getArrayNames" : function(objs){
+  //     var arr = []
+  //     for (i = 0; i < objs.length; ++i) {
+  //         arr.push(objs[i].name);
+  //     }
+  //     return arr;
+  //   },
+  // "getIndexOfArray": function(objs, name){
+  //   var index = 0;
+  //   for (i = 0; i < objs.length; ++i) {
+  //     if(name == objs[i]){
+  //       index = i;
+  //       return index;
+  //     }
+  //   }
+  //   return index;
+  // },
+  // "getIndexOf": function(objs, name){
+  //   var index = 0;
+  //   for (i = 0; i < objs.length; ++i) {
+  //     if(name == objs[i]){
+  //       index = i;
+  //       return index;
+  //     }
+  //   }
+  //   return index;
+  // },
   "saveActiveTokenToComputer": function () {
-    function saveActiveTokenToComputer(context, token, userid, username, useremail) {
+    function saveActiveTokenToComputer(context, token, userid, username, useremail, webContents) {
       // [[NSUserDefaults standardUserDefaults] setObject:token forKey:"QUSER_qordoba_token" + "_" + qordobaSDK.common.version]
       // [[NSUserDefaults standardUserDefaults] setObject:userid forKey:"QUSER_qordoba_user_id" + "_" + qordobaSDK.common.version]
       // [[NSUserDefaults standardUserDefaults] setObject:username forKey:"QUSER_qordoba_user_name" + "_" + qordobaSDK.common.version]
       // [[NSUserDefaults standardUserDefaults] setObject:useremail forKey:"QUSER_qordoba_user_email" + "_" + qordobaSDK.common.version]
       // [[NSUserDefaults standardUserDefaults] synchronize]
 
-      NSUserDefaults.standardUserDefaults(token, "QUSER_qordoba_token" + "_" + qordobaSDK.common.version);
-      NSUserDefaults.standardUserDefaults(userid, "QUSER_qordoba_user_id" + "_" + qordobaSDK.common.version);
-      NSUserDefaults.standardUserDefaults(username, "QUSER_qordoba_user_name" + "_" + qordobaSDK.common.version);
-      NSUserDefaults.standardUserDefaults(useremail, "QUSER_qordoba_user_email" + "_" + qordobaSDK.common.version);
-      NSUserDefaults.standardUserDefaults(synchronize);
+      // NSUserDefaults.standardUserDefaults(token, "QUSER_qordoba_token" + "_" + qordobaSDK.common.version)
+      // NSUserDefaults.standardUserDefaults(userid, "QUSER_qordoba_user_id" + "_" + qordobaSDK.common.version)
+      // NSUserDefaults.standardUserDefaults(username, "QUSER_qordoba_user_name" + "_" + qordobaSDK.common.version)
+      // NSUserDefaults.standardUserDefaults(useremail, "QUSER_qordoba_user_email" + "_" + qordobaSDK.common.version)
+      // NSUserDefaults.standardUserDefaults(synchronize)
+      var userDefaults = NSUserDefaults.standardUserDefaults();
+      userDefaults.setObject_forKey(token, 'QUSER_qordoba_token');
+      userDefaults.setObject_forKey(userid, 'QUSER_qordoba_user_id');
+      userDefaults.setObject_forKey(username, 'QUSER_qordoba_user_name');
+      userDefaults.setObject_forKey(useremail, 'QUSER_qordoba_user_email');
+      var storedToken = userDefaults.objectForKey('QUSER_qordoba_token');
+      webContents.executeJavaScript('logInfoToRollbar("' + String(useremail) + '", "Storing user\'s token on computer under key QUSER_qordoba_token.(src/utils.js)")');
     }
 
     return saveActiveTokenToComputer;
-  }(),
-
-  "getUserName": function () {
-    function getUserName(context) {
-      // var value = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba_user_name" + "_" + qordobaSDK.common.version];
-      var value = NSUserDefaults.standardUserDefaults("QUSER_qordoba_user_name" + "_" + qordobaSDK.common.version);
-      if (value) {
-        return value;
-      } else {
-        return false;
-      }
-    }
-
-    return getUserName;
-  }(),
-
-  "getUserEmail": function () {
-    function getUserEmail(context) {
-      // var value = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba_user_email" + "_" + qordobaSDK.common.version];
-      var value = NSUserDefaults.standardUserDefaults("QUSER_qordoba_user_email" + "_" + qordobaSDK.common.version);
-      if (value) {
-        return value;
-      } else {
-        return false;
-      }
-    }
-
-    return getUserEmail;
-  }(),
-  "getUserId": function () {
-    function getUserId(context) {
-      // var value = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba_user_id" + "_" + qordobaSDK.common.version];
-      var value = NSUserDefaults.standardUserDefaults("QUSER_qordoba_user_id" + "_" + qordobaSDK.common.version);
-      if (value) {
-        return value;
-      } else {
-        return false;
-      }
-    }
-
-    return getUserId;
-  }(),
-
-  "deleteActiveToken": function () {
-    function deleteActiveToken(context) {
-      // [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"QUSER_qordoba_token" + "_" + qordobaSDK.common.version];
-      // [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"QUSER_qordoba_user_id" + "_" + qordobaSDK.common.version];
-      // [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"QUSER_qordoba_user_name" + "_" + qordobaSDK.common.version];
-      // [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"QUSER_qordoba_user_email" + "_" + qordobaSDK.common.version];
-      NSUserDefaults.standardUserDefaults("QUSER_qordoba_token" + "_" + qordobaSDK.common.version);
-      NSUserDefaults.standardUserDefaults("QUSER_qordoba_user_id" + "_" + qordobaSDK.common.version);
-      NSUserDefaults.standardUserDefaults("QUSER_qordoba_user_name" + "_" + qordobaSDK.common.version);
-      NSUserDefaults.standardUserDefaults("QUSER_qordoba_user_email" + "_" + qordobaSDK.common.version);
-      this.deleteAllKeys(context);
-    }
-
-    return deleteActiveToken;
-  }(),
-  "saveUserOrganizations": function () {
-    function saveUserOrganizations(context, organizations) {
-      // [[NSUserDefaults standardUserDefaults] setObject:organizations forKey:"QUSER_qordoba_user_organizations" + "_" + qordobaSDK.common.version]
-      // [[NSUserDefaults standardUserDefaults] synchronize]
-      NSUserDefaults.standardUserDefaults(organizations, "QUSER_qordoba_user_organizations" + "_" + qordobaSDK.common.version);
-      NSUserDefaults.standardUserDefaults(synchronize);
-    }
-
-    return saveUserOrganizations;
-  }(),
-
-  "getUserOrganizations": function () {
-    function getUserOrganizations(context) {
-      // var value = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba_user_organizations" + "_" + qordobaSDK.common.version];
-      var value = NSUserDefaults.standardUserDefaults("QUSER_qordoba_user_organizations" + "_" + qordobaSDK.common.version);
-      if (value) {
-        return value;
-      } else {
-        return false;
-      }
-    }
-
-    return getUserOrganizations;
-  }(),
-  "fireError": function () {
-    function fireError(title, text) {
-      // [app displayDialog:text withTitle:title]
-      app.displayDialog(text, title);
-    }
-
-    return fireError;
-  }(),
-  "deleteAllKeys": function () {
-    function deleteAllKeys(context) {
-      // var defaultsDictionary = [[NSUserDefaults standardUserDefaults] dictionaryRepresentation];
-      // var keys = [defaultsDictionary allKeys]
-      var defaultsDictionary = NSUserDefaults.standardUserDefaults(dictionaryRepresentation);
-      var keys = defaultsDictionary.allKeys();
-      for (i = 0; i < keys.count(); ++i) {
-        var key = keys[i];
-        if (key.hasPrefix("QUSER")) {
-          // [[NSUserDefaults standardUserDefaults] removeObjectForKey:key];
-          NSUserDefaults.standardUserDefaults.removeObjectForKey(key);
-        }
-      }
-      // [[NSUserDefaults standardUserDefaults] synchronize];
-      NSUserDefaults.standardUserDefaults.synchronize();
-    }
-
-    return deleteAllKeys;
   }()
+
+  // "getUserName": function(context) {
+  //   // var value = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba_user_name" + "_" + qordobaSDK.common.version];
+  //     var value = NSUserDefaults.standardUserDefaults("QUSER_qordoba_user_name" + "_" + qordobaSDK.common.version);
+  //   if (value) {
+  //     return value;
+  //   } else {
+  //     return false;
+  //   }
+  // },
+
+  // "getUserEmail": function(context) {
+  //   // var value = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba_user_email" + "_" + qordobaSDK.common.version];
+  //   var value = NSUserDefaults.standardUserDefaults("QUSER_qordoba_user_email" + "_" + qordobaSDK.common.version);
+  //   if (value) {
+  //     return value;
+  //   } else {
+  //     return false;
+  //   }
+  // },
+  // "getUserId": function(context) {
+  //   // var value = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba_user_id" + "_" + qordobaSDK.common.version];
+  //   var value = NSUserDefaults.standardUserDefaults("QUSER_qordoba_user_id" + "_" + qordobaSDK.common.version);
+  //   if (value) {
+  //     return value;
+  //   } else {
+  //     return false;
+  //   }
+  // },
+
+  // "deleteActiveToken": function(context) {
+  //   // [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"QUSER_qordoba_token" + "_" + qordobaSDK.common.version];
+  //   // [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"QUSER_qordoba_user_id" + "_" + qordobaSDK.common.version];
+  //   // [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"QUSER_qordoba_user_name" + "_" + qordobaSDK.common.version];
+  //   // [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"QUSER_qordoba_user_email" + "_" + qordobaSDK.common.version];
+  //   NSUserDefaults.standardUserDefaults("QUSER_qordoba_token" + "_" + qordobaSDK.common.version)
+  //   NSUserDefaults.standardUserDefaults("QUSER_qordoba_user_id" + "_" + qordobaSDK.common.version)
+  //   NSUserDefaults.standardUserDefaults("QUSER_qordoba_user_name" + "_" + qordobaSDK.common.version)
+  //   NSUserDefaults.standardUserDefaults("QUSER_qordoba_user_email" + "_" + qordobaSDK.common.version)
+  //   this.deleteAllKeys(context)
+  // },
+  // "saveUserOrganizations": function(context,organizations) {
+  //     // [[NSUserDefaults standardUserDefaults] setObject:organizations forKey:"QUSER_qordoba_user_organizations" + "_" + qordobaSDK.common.version]
+  //     // [[NSUserDefaults standardUserDefaults] synchronize]
+  //     NSUserDefaults.standardUserDefaults(organizations, "QUSER_qordoba_user_organizations" + "_" + qordobaSDK.common.version)
+  //     NSUserDefaults.standardUserDefaults(synchronize)
+  // },
+
+  // "getUserOrganizations": function(context) {
+  //   // var value = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba_user_organizations" + "_" + qordobaSDK.common.version];
+  //   var value = NSUserDefaults.standardUserDefaults("QUSER_qordoba_user_organizations" + "_" + qordobaSDK.common.version);
+  //   if (value) {
+  //     return value;
+  //   } else {
+  //     return false;
+  //   }
+  // },
+  // "fireError": function(title,text){
+  //   // [app displayDialog:text withTitle:title]
+  //   app.displayDialog(text, title)
+  // },
+  // "deleteAllKeys": function(context){
+  //   // var defaultsDictionary = [[NSUserDefaults standardUserDefaults] dictionaryRepresentation];
+  //   // var keys = [defaultsDictionary allKeys]
+  //   var defaultsDictionary = NSUserDefaults.standardUserDefaults(dictionaryRepresentation);
+  //   var keys = defaultsDictionary.allKeys();
+  //   for (i = 0; i < keys.count(); ++i) {
+  //       var key = keys[i]
+  //       if(key.hasPrefix("QUSER")){
+  //         // [[NSUserDefaults standardUserDefaults] removeObjectForKey:key];
+  //         NSUserDefaults.standardUserDefaults.removeObjectForKey(key);
+  //       }
+  //   }
+  //   // [[NSUserDefaults standardUserDefaults] synchronize];
+  //   NSUserDefaults.standardUserDefaults.synchronize();
+  // },
   //   "getOrganization": function(context){
   //     var object = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba connected organization" + "_" + qordobaSDK.common.version];
   //     if (object) {
@@ -4723,8 +4665,7 @@ utils = {
 };
 
 var config = utils;
-exports["default"] = utils;
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+exports['default'] = utils;
 
 /***/ }),
 /* 26 */

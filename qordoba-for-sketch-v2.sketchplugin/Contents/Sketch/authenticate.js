@@ -857,43 +857,46 @@ exports['default'] = function (context) {
 
   var webContents = browserWindow.webContents;
 
-  function fetchProjects() {
-    console.log('fetchProjects invoked from authenticate.js!!!!');
-    var orgId = String(_sketch2['default'].Settings.settingForKey('organizations')[0].id);
-    console.log('orgId', orgId);
-    var token = _sketch2['default'].Settings.settingForKey('token');
-    var username = _sketch2['default'].Settings.settingForKey('username');
-    var fetchProjectsURL = 'https://app.qordoba.com/api/organizations/' + String(orgId) + '/projects/by_type/7';
-    (0, _sketchPolyfillFetch2['default'])(fetchProjectsURL, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'sketch',
-        'X-AUTH-TOKEN': token
-      }
-    }).then(function (response) {
-      console.log('response', JSON.stringify(response));
-      if (response.status === 200) {
-        response.json().then(function (data) {
-          console.log('data', JSON.stringify(data));
-          var projects = data.projects;
-          console.log('projects', JSON.stringify(projects));
-          console.log('projects.length', projects.length);
-          webContents.executeJavaScript('logInfoToRollbar("' + String(username) + '", "Request to fetch projects from Qordoba successful.")');
-          setProjectsIntoState(projects);
-        });
-      } else {
-        console.log('fetchProjects failed', username);
-        response.json().then(function (data) {
-          console.log('data', data);
-        });
-        webContents.executeJavaScript('logErrorToRollbar("' + String(username) + '", "Request to fetch projects from Qordoba unsuccessful")');
-      }
-    });
-    // .catch(error => {
-    //   console.log('fetchProjects catch statement', error);
-    // })
-  }
+  // function fetchProjects() {
+  //   console.log('fetchProjects invoked from authenticate.js!!!!');
+  //   const orgId = String(sketch.Settings.settingForKey('organizations')[0].id);
+  //   console.log('orgId', orgId);
+  //   const token = sketch.Settings.settingForKey('token');
+  //   const username = sketch.Settings.settingForKey('username');
+  //   const fetchProjectsURL = `https://app.qordoba.com/api/organizations/${orgId}/projects/by_type/7`;
+  //   fetch(fetchProjectsURL, {
+  //     method: 'GET',
+  //     headers: {
+  //         'Content-Type': 'application/json',
+  //         'User-Agent': 'sketch',
+  //         'X-AUTH-TOKEN': token
+  //     }
+  //   })
+  //     .then(response => {
+  //       console.log('response', JSON.stringify(response));
+  //       if (response.status === 200) {
+  //         response.json()
+  //           .then(data => {
+  //             console.log('data', JSON.stringify(data));
+  //             const projects = data.projects;
+  //             console.log('projects', JSON.stringify(projects));
+  //             console.log('projects.length', projects.length);
+  //             webContents.executeJavaScript(`logInfoToRollbar("${username}", "Request to fetch projects from Qordoba successful.")`);
+  //             setProjectsIntoState(projects);
+  //           })
+  //       } else {
+  //         console.log('fetchProjects failed', username);
+  //         response.json()
+  //           .then(data => {
+  //             console.log('data', data);
+  //           });
+  //         webContents.executeJavaScript(`logErrorToRollbar("${username}", "Request to fetch projects from Qordoba unsuccessful")`);
+  //       }
+  //     })
+  //     // .catch(error => {
+  //     //   console.log('fetchProjects catch statement', error);
+  //     // })
+  // }
 
   function setProjectsIntoState(projects) {
     console.log('setProjectsIntoState invoked!');
@@ -928,29 +931,31 @@ exports['default'] = function (context) {
   // add a handler for a call from web content's javascript
   webContents.on('login', function (s, username, password) {
     UI.message(s);
-    (0, _sketchPolyfillFetch2['default'])('https://app.qordoba.com/api/login', {
-      method: 'PUT',
-      body: JSON.stringify({
-        username: username,
-        password: password
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'sketch'
-      }
-    }).then(function (res) {
-      console.log('res', JSON.stringify(res));
-      if (res.status === 200) {
-        res.json().then(function (data) {
-          var name = data.loggedUser.name;
-          webContents.executeJavaScript('logInfoToRollbar("' + String(name) + '", "Login successful")');
-          browserWindow.close();
-          setUserInfo(data);
-        });
-      } else {
-        webContents.executeJavaScript('logErrorToRollbar("' + String(username) + '", "Login unsuccessful")');
-      }
-    });
+    // fetch('https://app.qordoba.com/api/login', {
+    //   method: 'PUT',
+    //   body: JSON.stringify({
+    //     username: username,
+    //     password: password
+    //   }),
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'User-Agent': 'sketch'
+    //   }
+    // })
+    //   .then((res) => {
+    //     console.log('res', JSON.stringify(res));
+    //     if (res.status === 200) {
+    //       res.json().then(data => {
+    //         const name = data.loggedUser.name;
+    //         webContents.executeJavaScript(`logInfoToRollbar("${name}", "Login successful")`);
+    //         browserWindow.close();
+    //         setUserInfo(data);
+    //       });
+    //     } else {
+    //       webContents.executeJavaScript(`logErrorToRollbar("${username}", "Login unsuccessful")`);
+    //     }
+    //   })
+    (0, _qordobaApi.loginWithUsernameAndPassword)(username, password, context, browserWindow, webContents);
   });
 
   webContents.on('logout', function () {
@@ -992,6 +997,8 @@ var _rollbar2 = _interopRequireDefault(_rollbar);
 var _sketch = __webpack_require__(9);
 
 var _sketch2 = _interopRequireDefault(_sketch);
+
+var _qordobaApi = __webpack_require__(33);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -3051,22 +3058,25 @@ module.exports = {
 
 /***/ }),
 /* 31 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+// // Needs to be loaded first!
+// @import 'framework-utils/qordoba-framework.js'
+// @import 'helpers/error-logging.js'
+// @import 'helpers/files.js'
+// @import 'helpers/utils.js'
+// @import 'helpers/manifest.js'
+// @import 'helpers/translate.js'
+// import 'helpers/qordoba-api.js'
+// @import "helpers/qordoba-utils.js"
+// @import 'helpers/texts.js'
+// @import 'helpers/forms.js'
+// @import 'helpers/controller.js'
 
-var _rollbar = __webpack_require__(7);
-
-var _rollbar2 = _interopRequireDefault(_rollbar);
-
-var _sketch = __webpack_require__(9);
-
-var _sketch2 = _interopRequireDefault(_sketch);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
+// var app = [NSApplication sharedApplication];
 var qordobaSDK = qordobaSDK || {};
 
 qordobaSDK.common = {
@@ -3079,67 +3089,1844 @@ qordobaSDK.common = {
     page: undefined,
     artboard: undefined,
     current: undefined,
-    userInfo: undefined,
     token: false,
-    testString: 'test',
     init: function () {
-        function init() {}
+        function init(context, currentIsArtboard) {
+            this.context = context;
+            this.document = context.document;
+            this.command = context.command;
+            this.selection = context.selection;
+            this.pages = this.document.pages();
+            this.page = this.document.currentPage();
+            this.artboard = this.page.currentArtboard();
+            this.current = this.artboard || this.page;
+            this.version = manifest.getPluginVersion(context);
+            this.token = getActiveToken(context);
+        }
 
         return init;
-    }(),
-    // setUserInfo: function(userInfo) {
-    //     console.log('setUserInfo invoked!');
-    //     const token = userInfo.token;
-    //     const loggedUser = userInfo.loggedUser;
-    //     const username = userInfo.loggedUser.name;
-    //     const organizations = userInfo.loggedUser.organizations;
-
-    //     sketch.Settings.setSettingForKey('loggedUser', loggedUser);
-    //     sketch.Settings.setSettingForKey('organizations', organizations);
-    //     sketch.Settings.setSettingForKey('token', userInfo.token);
-    //     sketch.Settings.setSettingForKey('username', username);
-    //     // fetchProjects();
-
-    // },
-    setRollbarIntoStateHandler: function () {
-        function setRollbarIntoStateHandler(rollbar) {}
-
-        return setRollbarIntoStateHandler;
     }()
+};
 
-    // function fetchProjects() {
-    //     console.log('fetchProjects invoked!');
-    //     const orgId = String(sketch.Settings.settingForKey('organizations')[0].id);
-    //     const token = sketch.Settings.settingForKey('token');
-    //     const fetchProjectsURL = `https://app.qordoba.com/api/organizations/3204/projects/by_type/7`;
-    //     console.log(fetchProjectsURL);
-    //     console.log('token', token);
-    //     fetch(fetchProjectsURL, {
-    //         method: 'GET',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //             'User-Agent': 'sketch',
-    //             'X-AUTH-TOKEN': String(token)
-    //         }
+exports["default"] = qordobaSDK;
 
-    //     })
-    //         .then(response => {
-    //             // const projects = response.projects;
-    //             console.log('projects', response.projects);
-    //             console.log('response', JSON.stringify(response));
-    //         })
-    //         .catch(error => {
-    //             console.log('fetchProjects failed', error);
-    //         })
-    // }
+// function sketchLog(context,string){
+//     if(utils.getDebugSetting(context) == 1)
+//     {
+//         NSLog(string)
+//         errorLogging.write(context,string)
+//     }
+// }
+// /**
+//  *
+//  * Show Config window to sepicfy the organization id, project id and language id
+//  *
+// **/
+// function fireTranslateForm(all,context){
+//     var doc = context.document
+//     sketchLog(context,"fireTranslateForm()");
 
-};exports['default'] = qordobaSDK;
+//     var currentPage = [doc currentPage]
+//     var pageName = [currentPage name];
+//     var windowTitle = "Downloading Page '"+pageName+"'"
+//     if(all){
+//         translate.excludeAllTextLayers(context)
+//     }else{
+//         var currentPage = [doc currentPage]
+//         if(utils.isGeneratedPage(currentPage,context)){
+//             fireError("Warning!", "This Page is the translated version. To fetch an updated version of the translation, please pull from the original Page.")
+//             return ;
+//         }
+//     }
+
+//     var width = 463;
+//     var height = 396;
+
+//     var windowSendArtboards = [[NSWindow alloc] init]
+//     [windowSendArtboards setFrame:NSMakeRect(0, 0, width, height) display:true]
+//     [windowSendArtboards setBackgroundColor:NSColor.whiteColor()]
+//     windowSendArtboards.movableByWindowBackground  = true
+//     [windowSendArtboards setStyleMask:NSBorderlessWindowMask];
+//     // Load UI from framework
+//     loadCoreFramework(context, gFrameworkName);
+//     //COScript.currentCOScript().setShouldKeepAround_(true);
+//     var nibUI = LoadNibFromFramework(context, 'DownloadView', ['organizationDropdown', 'projectDropdown','languageDropdown', 'cancelButton', 'downloadButton','goProButton','titleLabel','deatachOption','overrideOption']);
+
+//     [[windowSendArtboards contentView] addSubview:nibUI.view];
+
+//     var projects = [];
+//     var organization = null;
+//     // Organization
+//     var organizations  = utils.getOrganizations()
+//     var organizationsCount = [organizations count]
+//     var organization = utils.getOrganization()
+//     if(!organization){
+//         organization = [organizations objectAtIndex:0]
+//     }
+
+//     var noOrganizations = (organizationsCount == 0)
+//     var organizationIndex = 0
+//     var organizationNames = []
+//     for (i = 0; i < organizationsCount; ++i) {
+//             organizationNames.push(organizations[i].name);
+//             if(organization.id == organizations[i].id){
+//                 organizationIndex = i;
+//             }
+//     }
+
+//     var titleLabel = nibUI.titleLabel;
+//     titleLabel.stringValue = windowTitle;
+
+//     var goProButton = nibUI.goProButton;    
+//     var userStatus = getUserStatus(context);
+//     if(userStatus != "free"){
+//         goProButton.setHidden(true);
+//     }
+
+//     nibUI.attachTargetAndAction(goProButton, function() {       
+//         var url = [NSURL URLWithString:@"https://www.qordoba.com/sketch-professional"];
+//         if( ![[NSWorkspace sharedWorkspace] openURL:url] ){
+//             sketchLog(context,"Failed to open url:" + [url description])
+//         }   
+//     });
+
+//     var detachOption = nibUI.deatachOption
+//     var overrideOption = nibUI.overrideOption
+//     nibUI.attachTargetAndAction(detachOption, function() {      
+//         [overrideOption setState:NSOffState];   
+//     });
+
+//     nibUI.attachTargetAndAction(overrideOption, function() {        
+//         [detachOption setState:NSOffState];   
+//     });
+
+//     //var progressBar = false;//nibUI.progressBar;
+//     var orgDropdown = nibUI.organizationDropdown;
+//     [orgDropdown addItemsWithTitles:organizationNames]
+//     [orgDropdown selectItemAtIndex:organizationIndex]
+//     //var obj = this
+//     [orgDropdown setCOSJSTargetFunction:function(sender) {
+//         var organizationIndex = [sender indexOfSelectedItem]
+//         organization = organizations[organizationIndex]
+//         projects = getProjectsArray(organization.id,context)
+//         var projectNames = []
+//         for (i = 0; i < projects.length; ++i) {
+//             projectNames.push(projects[i].name);
+//         }
+//         projectIndex = 0
+//         [projectDropdown removeAllItems]
+//         [projectDropdown addItemsWithTitles:projectNames]
+//         [projectDropdown selectItemAtIndex:projectIndex]
+
+//         [languageDropdown removeAllItems]
+//     }]]
+
+
+//     //project
+//     projects = getProjectsArray(organization.id,context)
+//     var projectsCount = projects.length
+//     var project = utils.getProject()
+//     if(!project){
+//         project = projects[0]
+//     }
+
+//     var noProjects = (projectsCount == 0)
+//     var projectIndex = 0
+//     var projectNames = []
+//     for (i = 0; i < projectsCount; ++i) {
+//         projectNames.push(projects[i].name);
+//         if(project.id == projects[i].id){
+//             projectIndex = i;
+//             project = projects[i];
+//         }
+//     }
+
+//     var projectDropdown = nibUI.projectDropdown;
+//     [projectDropdown addItemsWithTitles:projectNames]
+//     [projectDropdown selectItemAtIndex:projectIndex]
+//     [projectDropdown setCOSJSTargetFunction:function(sender) {
+//         projectIndex = [sender indexOfSelectedItem]
+//         projects = getProjectsArray(organization.id,context)
+//         project = projects[projectIndex]
+//         [languageDropdown removeAllItems]
+//         languages = project.targetLanguages
+//         languageNames = utils.getNames(languages)
+//         [languageDropdown addItemsWithTitles:languageNames]
+//         [languageDropdown selectItemAtIndex:0]
+//     }]]
+//     ///Language
+//     var languageIndex = 0
+//     var languageNames = []
+//     if(project){
+//         var languages = project.targetLanguages
+//         var languagesCount = [languages count]
+//         var language = utils.getTargetLanguage()
+//         if(!language){
+//             language = languages[0]
+//         }
+//         for (i = 0; i < languagesCount; ++i) {
+//             languageNames.push(languages[i].name);
+//             if(language.id == languages[i].id){
+//                 languageIndex = i;
+//             }
+//         }
+//     }
+
+//     var languageDropdown = nibUI.languageDropdown;
+//     [languageDropdown addItemsWithTitles:languageNames]
+//     [languageDropdown selectItemAtIndex:languageIndex]
+
+//     var sendButton = nibUI.downloadButton
+//     var cancelButton = nibUI.cancelButton
+
+
+//     nibUI.attachTargetAndAction(sendButton, function() {
+//         languageIndex = [languageDropdown indexOfSelectedItem]
+//         language = languages[languageIndex]
+
+//         var symbolOption = "detach";
+//         if([overrideOption state]){
+//             symbolOption = "override";
+//         }
+
+//         utils.saveTargetLanguage(language)
+//         utils.saveProject(project)
+//         utils.saveOrganization(organization)
+//         //Translate
+//         controller.translateCurrentPage(organization,project,language, symbolOption, context)
+
+//         [cancelButton setCOSJSTargetFunction:undefined]
+//         [sendButton setCOSJSTargetFunction:undefined]
+//         [languageDropdown setCOSJSTargetFunction:undefined]
+//         [orgDropdown setCOSJSTargetFunction:undefined]
+//         [projectDropdown setCOSJSTargetFunction:undefined]
+//         [windowSendArtboards orderOut:nil]
+//         [app stopModal] 
+//     });
+
+//     nibUI.attachTargetAndAction(cancelButton, function() {      
+//         [cancelButton setCOSJSTargetFunction:undefined]
+//         [sendButton setCOSJSTargetFunction:undefined]
+//         [languageDropdown setCOSJSTargetFunction:undefined]
+//         [orgDropdown setCOSJSTargetFunction:undefined]
+//         [projectDropdown setCOSJSTargetFunction:undefined]
+//         [windowSendArtboards orderOut:nil]
+//         [app stopModal]
+//     });
+
+
+//     [windowSendArtboards setDefaultButtonCell:[sendButton cell]];
+//     [app runModalForWindow:windowSendArtboards]
+// }
+
+// /*
+//  *
+//  *
+//  *
+//  */
+// function fireUploadForm(all, context){
+//     var doc = context.document
+//     sketchLog(context,"fireUploadForm()");
+
+//     var currentPage = [doc currentPage]
+//     var pageName = [currentPage name];
+//     var windowTitle = "Upload Page '"+pageName+"' to Qordoba"
+//     // Organization
+//     var organizations  = utils.getOrganizations()
+//     var organizationsCount = [organizations count]
+//     var organization = utils.getOrganization()
+//     if(!organization){
+//         organization = [organizations objectAtIndex:0]
+//     }
+//     var noOrganizations = (organizationsCount == 0)
+//     var organizationIndex = 0
+//     var organizationNames = []
+//     for (i = 0; i < organizationsCount; ++i) {
+//             organizationNames.push(organizations[i].name);
+//             if(organization.id == organizations[i].id){
+//                 organizationIndex = i;
+//             }
+//     }
+
+//     //project
+//     var projects = getProjectsArray(organization.id,context)
+//     var projectsCount = projects.length
+//     var noProjects = (projectsCount == 0)
+//     var project = false
+//     if(!noProjects){
+//         var project = utils.getProject()
+//         if(!project){
+//             project = projects[0]
+//         }
+//     }
+//     var projectIndex = 0
+//     var projectNames = []
+//     for (i = 0; i < projectsCount; ++i) {
+//             projectNames.push(projects[i].name);
+//             if(project.id == projects[i].id){
+//                 projectIndex = i;
+//             }
+//     }
+
+//     var width = 468;
+//     var height = 303;
+
+//     var windowSendArtboards = [[NSWindow alloc] init]
+//     [windowSendArtboards setFrame:NSMakeRect(0, 0, width, height) display:true]
+//     [windowSendArtboards setBackgroundColor:NSColor.whiteColor()]
+//     windowSendArtboards.movableByWindowBackground  = true
+//     [windowSendArtboards setStyleMask:NSBorderlessWindowMask];
+
+//     // Load UI from framework
+//     loadCoreFramework(context, gFrameworkName);
+//     //COScript.currentCOScript().setShouldKeepAround_(true);
+//     var nibUI = LoadNibFromFramework(context, 'UploadView', ['organizationDropdown', 'projectDropdown', 'cancelButton', 'uploadButton','goProButton','titleLabel']);
+
+
+//     [[windowSendArtboards contentView] addSubview:nibUI.view];
+
+//     var titleLabel = nibUI.titleLabel;
+//     titleLabel.stringValue = windowTitle;
+
+
+//     var goProButton = nibUI.goProButton;    
+//     var userStatus = getUserStatus(context);
+//     if(userStatus != "free"){
+//         goProButton.setHidden(true);
+//     }
+
+//     nibUI.attachTargetAndAction(goProButton, function() {       
+//         var url = [NSURL URLWithString:@"https://www.qordoba.com/sketch-professional"];
+//         if( ![[NSWorkspace sharedWorkspace] openURL:url] ){
+//             sketchLog(context,"Failed to open url:" + [url description])
+//         }   
+//     });
+
+
+//     var orgDropdown = nibUI.organizationDropdown;
+//     [orgDropdown addItemsWithTitles:organizationNames];
+//     [orgDropdown selectItemAtIndex:organizationIndex];
+//     [orgDropdown setCOSJSTargetFunction:function(sender) {
+//         var organizationIndex = [sender indexOfSelectedItem]
+//         organization = organizations[organizationIndex]
+//         projects = getProjectsArray(organization.id,context)
+//         projectsCount = projects.length
+//         noProjects = (projectsCount == 0)
+//         projectNames = []
+//         for (i = 0; i < projects.length; ++i) {
+//             projectNames.push(projects[i].name);
+//         }
+//         projectIndex = 0
+//         [projectDropdown removeAllItems]
+//         [projectDropdown addItemsWithTitles:projectNames]
+//         [projectDropdown selectItemAtIndex:projectIndex]
+//     }]]
+
+
+//     var projectDropdown = nibUI.projectDropdown;
+//     if(noProjects){
+//         var noStringProject = ["No Sketch projects"]
+//         [projectDropdown addItemsWithTitles:noStringProject]    
+//     }else {
+//         [projectDropdown addItemsWithTitles:projectNames]   
+//     }
+
+//     [projectDropdown selectItemAtIndex:projectIndex]
+//     [projectDropdown setCOSJSTargetFunction:function(sender) {
+//         projectIndex = [sender indexOfSelectedItem]
+//         project = projects[projectIndex]
+//     }]]
+
+
+//     var sendButton = nibUI.uploadButton
+//     var cancelButton = nibUI.cancelButton
+
+
+//     nibUI.attachTargetAndAction(sendButton, function() {        
+//          if(noProjects){
+//             utils.fireError("No Project Selected!", " There's no project selected.. please choose another organization.")   
+//             return ;
+//          }
+//          [sendButton setTitle:"Uploading ..."]
+//          utils.saveProject(project)
+//          utils.saveOrganization(organization)
+//          //upload pages
+//          //controller.uploadCurrentPage(organization, project, context)
+
+//         [cancelButton setCOSJSTargetFunction:undefined]
+//         [sendButton setCOSJSTargetFunction:undefined]
+//         [orgDropdown setCOSJSTargetFunction:undefined]
+//         [projectDropdown setCOSJSTargetFunction:undefined]
+//         [windowSendArtboards orderOut:nil]
+//         [app stopModal]
+//         //upload the page after the modal is stop so we can run on seperate thread!
+//         controller.uploadCurrentPage(organization, project, context)
+
+//     });
+
+//     nibUI.attachTargetAndAction(cancelButton, function() {
+//         [cancelButton setCOSJSTargetFunction:undefined]
+//         [sendButton setCOSJSTargetFunction:undefined]
+//         [orgDropdown setCOSJSTargetFunction:undefined]
+//         [projectDropdown setCOSJSTargetFunction:undefined]
+//         [windowSendArtboards orderOut:nil]
+//         [app stopModal]
+//     });
+
+//     [windowSendArtboards setDefaultButtonCell:[sendButton cell]];
+//     [app runModalForWindow:windowSendArtboards]
+
+//     nibUI.destroy();
+
+// }
+
+
+// // Plugin Calls
+// function fireLoginWindowWithContext(context){
+//     // create window
+//     var loginWindow = [[NSWindow alloc] init]
+//     [loginWindow setFrame:NSMakeRect(0, 0, 540, 332) display:false]
+//     [loginWindow setBackgroundColor:NSColor.whiteColor()]
+
+//     var plugin = context.plugin
+
+//     if(utils.isRetinaDisplay()){
+//         var imageFilePath=[plugin urlForResourceNamed:"logo@2x.png"];
+//     } else {
+//         var imageFilePath=[plugin urlForResourceNamed:"logo.png"];
+//     }
+//     var imageData = [NSData dataWithContentsOfURL:imageFilePath];
+//     var image = NSImage.alloc().initWithData(imageData);
+
+//     var imageView = [[NSImageView alloc] initWithFrame:NSMakeRect(46, 124, 164, 149)];
+//     [imageView setImage: image];
+//     [[loginWindow contentView] addSubview:imageView];
+
+//     // create prompt text
+//     var titleField = [[NSTextField alloc] initWithFrame:NSMakeRect(248, 249, 243, 17)]
+//     [titleField setEditable:false]
+//     [titleField setBordered:false]
+//     [titleField setDrawsBackground:false]
+//     [titleField setFont:[NSFont boldSystemFontOfSize:15]];
+//     [titleField setStringValue:"Use Qordoba & Sketch"]
+//     [[loginWindow contentView] addSubview:titleField]
+
+//     // create prompt text
+//     var subtitleField = [[NSTextField alloc] initWithFrame:NSMakeRect(248, 224, 243, 15)]
+//     [subtitleField setEditable:false]
+//     [subtitleField setBordered:false]
+//     [subtitleField setFont:[NSFont systemFontOfSize:13]];
+//     [subtitleField setTextColor:[NSColor colorWithCalibratedRed:(93/255) green:(93/255) blue:(93/255) alpha:1]];
+//     [subtitleField setDrawsBackground:false]
+//     [subtitleField setStringValue:"Sign in and sent artboards to Qordoba!"]
+//     [subtitleField sizeToFit]
+//     [[loginWindow contentView] addSubview:subtitleField]
+
+//     var emailInputField = [[NSTextField alloc] initWithFrame:NSMakeRect(250, 181, 243, 23)]
+//     [[emailInputField cell] setPlaceholderString:"Email"]
+//     [[loginWindow contentView] addSubview:emailInputField]  
+
+//     var passwordField = [[NSSecureTextField alloc] initWithFrame:NSMakeRect(250, 150, 243, 23)]
+//     [[passwordField cell] setPlaceholderString:"Password"]
+//     [[loginWindow contentView] addSubview:passwordField]    
+
+//     var yPosButtons = 102;
+
+//     var loginButton = [[NSButton alloc] initWithFrame:NSMakeRect(407, yPosButtons, 92, 46)]
+//     var cancelButton = [[NSButton alloc] initWithFrame:NSMakeRect(321, yPosButtons, 92, 46)]
+//     var createQordobaButton = [[NSButton alloc] initWithFrame:NSMakeRect(44, 23, 162, 32)]
+//     var createHelpButton = [[NSButton alloc] initWithFrame:NSMakeRect(470, 23, 32, 32)]
+
+//     [loginButton setTitle:"Sign in"]
+//     [loginButton setBezelStyle:NSRoundedBezelStyle]
+//     [loginButton setKeyEquivalent:"\r"]
+//     [loginButton setCOSJSTargetFunction:function(sender) {
+//         var email = emailInputField.stringValue()
+//         var password = passwordField.stringValue()
+//         var res = loginWithUsernameAndPassword(email, password, context)
+//         if(res){
+//             [loginWindow orderOut:nil]
+//             [app stopModal]
+//             [cancelButton setCOSJSTargetFunction:undefined]
+//             [loginButton setCOSJSTargetFunction:undefined]
+//             [createQordobaButton setCOSJSTargetFunction:undefined]
+//             [createHelpButton setCOSJSTargetFunction:undefined]
+//         }
+//     }];
+//     [loginButton setAction:"callAction:"]
+//     [[loginWindow contentView] addSubview:loginButton]
+
+
+//     [cancelButton setTitle:"Cancel"]
+//     [cancelButton setBezelStyle:NSRoundedBezelStyle]
+//     [cancelButton setCOSJSTargetFunction:function(sender) {
+//         [loginWindow orderOut:nil]
+//         [app stopModal]
+//         [cancelButton setCOSJSTargetFunction:undefined]
+//         [loginButton setCOSJSTargetFunction:undefined]
+//         [createQordobaButton setCOSJSTargetFunction:undefined]
+//         [createHelpButton setCOSJSTargetFunction:undefined]
+//     }];
+//     [cancelButton setAction:"callAction:"]
+//     [[loginWindow contentView] addSubview:cancelButton]
+
+
+//     //Bottom Bar
+
+//     var bottomActionsView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 540, 79)];
+//     bottomActionsView.setWantsLayer(true);
+//     [[loginWindow contentView] addSubview:bottomActionsView];   
+
+//     var backgroundLayer = [CALayer layer];
+//     [backgroundLayer setBackgroundColor:CGColorCreateGenericRGB(246/255, 246/255, 246/255, 1.0)]; //RGB plus Alpha Channel
+//     [bottomActionsView setLayer:backgroundLayer]
+
+//     var borderLayer = [CALayer layer];
+//     borderLayer.frame = CGRectMake(0, 78, 540, 1);
+//     [borderLayer setBackgroundColor:CGColorCreateGenericRGB(220/255, 220/255, 220/255, 1.0)]; //RGB plus Alpha Channel
+//     [backgroundLayer addSublayer:borderLayer];
+
+//     //Create Marvel Button
+
+//     [createQordobaButton setTitle:"No account? Sign up"]
+//     [createQordobaButton setBezelStyle:NSRoundedBezelStyle]
+//     [createQordobaButton setCOSJSTargetFunction:function(sender) {
+//         var url = [NSURL URLWithString:@"https://www.qordoba.com/sketch-professional"];
+//         if( ![[NSWorkspace sharedWorkspace] openURL:url] ){
+//             sketchLog(context,"Failed to open url:" + [url description])
+//         }    
+//     }];
+//     [createQordobaButton setAction:"callAction:"]
+//     [bottomActionsView addSubview:createQordobaButton]  
+
+//     [createHelpButton setBezelStyle:NSHelpButtonBezelStyle]
+//     [createHelpButton setTitle:nil]
+//     [createHelpButton setCOSJSTargetFunction:function(sender) {
+//         var url = [NSURL URLWithString:@"https://support.qordoba.com"];
+//         if( ![[NSWorkspace sharedWorkspace] openURL:url] ){
+//             sketchLog(context,"Failed to open url:" + [url description])
+//         }
+//     }];
+//     [createHelpButton setAction:"callAction:"]
+//     [bottomActionsView addSubview:createHelpButton]
+
+
+//     [loginWindow setDefaultButtonCell:[loginButton cell]];
+
+//     [app runModalForWindow:loginWindow] 
+// }
+
+// /**
+//  *
+//  *
+//  *
+// **/
+// function fireAlreadyLoggedInWindow(context){
+
+//     // create window
+//     var alreadyLoggedInWindow = [[NSWindow alloc] init]
+//     [alreadyLoggedInWindow setFrame:NSMakeRect(0, 0, 540, 332) display:false]
+//     [alreadyLoggedInWindow setBackgroundColor:NSColor.whiteColor()]
+
+//     var userName =  utils.getUserName(context)
+//     var userEmail = utils.getUserEmail(context)
+
+//     var width = 540
+//     //Logo
+//     var plugin = context.plugin
+//     if(utils.isRetinaDisplay()){
+//         var imageFilePath=[plugin urlForResourceNamed:"logo@2x.png"];
+//     } else {
+//         var imageFilePath=[plugin urlForResourceNamed:"logo.png"];
+//     }
+//     var imageData = [NSData dataWithContentsOfURL:imageFilePath];
+//     var image = NSImage.alloc().initWithData(imageData);
+
+//     var imageView = [[NSImageView alloc] initWithFrame:NSMakeRect((width - 164)/2 -10, 180, 164, 149)];
+//     [imageView setImage: image];
+//     [[alreadyLoggedInWindow contentView] addSubview:imageView];
+
+//     // create prompt text
+//     var titleField = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 180, 540, 17)]
+//     [titleField setEditable:false]
+//     [titleField setBordered:false]
+//     [titleField setAlignment:2] 
+//     [titleField setDrawsBackground:false]
+//     [titleField setFont:[NSFont boldSystemFontOfSize:13]];
+//     [titleField setStringValue:"Welcome "+userName+"!"]
+//     [[alreadyLoggedInWindow contentView] addSubview:titleField]
+
+//     var title2Field  = utils.createLabel("You are logged in under " + userEmail+ ".",NSMakeRect(-110, 160, 540, 17))
+//     [[alreadyLoggedInWindow contentView] addSubview:title2Field]
+
+//     // create prompt text
+//     var subtitleField = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 120, 540, 30)]
+//     [subtitleField setEditable:false]
+//     [subtitleField setBordered:false]
+//     [subtitleField setAlignment:2] 
+//     [subtitleField setFont:[NSFont systemFontOfSize:13]];
+//     [subtitleField setTextColor:[NSColor colorWithCalibratedRed:(93/255) green:(93/255) blue:(93/255) alpha:1]];
+//     [subtitleField setDrawsBackground:false]
+//     [subtitleField setStringValue:texts.logout_first_text]
+//     [[alreadyLoggedInWindow contentView] addSubview:subtitleField]
+
+//     var yPosButtons = 80;
+
+//     // Buttons
+
+//     var logoutButton = [[NSButton alloc] initWithFrame:NSMakeRect(267, yPosButtons, 92, 46)]
+//     var cancelButton = [[NSButton alloc] initWithFrame:NSMakeRect(181, yPosButtons, 92, 46)]
+
+//     [logoutButton setTitle:"Sign out"]
+//     [logoutButton setBezelStyle:NSRoundedBezelStyle]
+//     [logoutButton setCOSJSTargetFunction:function(sender) {
+//         utils.deleteActiveToken(context)
+//         [alreadyLoggedInWindow orderOut:nil]
+//         [app stopModal]
+//         [logoutButton setCOSJSTargetFunction:undefined]
+//         [cancelButton setCOSJSTargetFunction:undefined]
+//         fireLoginWindowWithContext(context)
+//     }];
+//     [logoutButton setAction:"callAction:"]
+//     [[alreadyLoggedInWindow contentView] addSubview:logoutButton]
+
+
+//     [cancelButton setTitle:"Cancel"]
+//     [cancelButton setBezelStyle:NSRoundedBezelStyle]
+//     [cancelButton setCOSJSTargetFunction:function(sender) {
+//         [alreadyLoggedInWindow  orderOut:nil]
+//         [app stopModal]
+//         [logoutButton setCOSJSTargetFunction:undefined]
+//         [cancelButton setCOSJSTargetFunction:undefined]
+//     }];
+//     [cancelButton setAction:"callAction:"]
+//     [[alreadyLoggedInWindow contentView] addSubview:cancelButton]
+
+//     [alreadyLoggedInWindow setDefaultButtonCell:[logoutButton cell]];
+
+//     [app runModalForWindow:alreadyLoggedInWindow]
+// }
+
+// /**
+//  *
+//  * Fire Support
+//  *
+// **/ 
+// function fireSupport(context){
+//     var systemVersionDictionary = [NSDictionary dictionaryWithContentsOfFile:@"/System/Library/CoreServices/SystemVersion.plist"]
+//     var systemVersion = [systemVersionDictionary objectForKey:@"ProductVersion"]
+//     var pluginVersion = manifest.getPluginVersion(context)
+//     var sketchVersion = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]
+
+//     var windowSendArtboards = [[NSWindow alloc] init]
+//     [windowSendArtboards setFrame:NSMakeRect(0, 0, 485, 333) display:false]
+//     [windowSendArtboards setBackgroundColor:NSColor.whiteColor()]
+//     var xPos = 30;
+//     var titleField = [[NSTextField alloc] initWithFrame:NSMakeRect(xPos, 235, 540, 17)]
+//     [titleField setEditable:false]
+//     [titleField setBordered:false]
+//     [titleField setDrawsBackground:false]
+//     [titleField setFont:[NSFont boldSystemFontOfSize:13]];
+//     [titleField setStringValue:"Report a bug"]
+//     [[windowSendArtboards contentView] addSubview:titleField]
+
+//     var step1Label = [[NSTextField alloc] initWithFrame:NSMakeRect(xPos, 200, 540, 17)]
+//     [step1Label setEditable:false]
+//     [step1Label setBordered:false]
+//     [step1Label setDrawsBackground:false]
+//     [step1Label setFont:[NSFont systemFontOfSize:12]]
+//     [step1Label setStringValue:"1. Make sure this checkbox is checked (it will turn on debug mode): "]
+//     [step1Label setTextColor:[NSColor colorWithCalibratedRed:(93/255) green:(93/255) blue:(93/255) alpha:1]]
+//     [[windowSendArtboards contentView] addSubview:step1Label]
+
+//     var step2Label = [[NSTextField alloc] initWithFrame:NSMakeRect(xPos, 172, 540, 17)]
+//     [step2Label setEditable:false]
+//     [step2Label setBordered:false]
+//     [step2Label setDrawsBackground:false]
+//     [step2Label setFont:[NSFont systemFontOfSize:12]]
+//     [step2Label setStringValue:"2. Close this window and replicate the bug."]
+//     [step2Label setTextColor:[NSColor colorWithCalibratedRed:(93/255) green:(93/255) blue:(93/255) alpha:1]]
+//     [[windowSendArtboards contentView] addSubview:step2Label]
+
+//     var step3Label = [[NSTextField alloc] initWithFrame:NSMakeRect(xPos, 144, 540, 17)]
+//     [step3Label setEditable:false]
+//     [step3Label setBordered:false]
+//     [step3Label setDrawsBackground:false]
+//     [step3Label setFont:[NSFont systemFontOfSize:12]]
+//     [step3Label setStringValue:"3. Come back to this window and hit send."]
+//     [step3Label setTextColor:[NSColor colorWithCalibratedRed:(93/255) green:(93/255) blue:(93/255) alpha:1]]
+//     [[windowSendArtboards contentView] addSubview:step3Label]
+
+//     var bottomActionsView = [[NSView alloc] initWithFrame:NSMakeRect(xPos, 112, 420, 1)]
+//     bottomActionsView.setWantsLayer(true)
+//     [[windowSendArtboards contentView] addSubview:bottomActionsView]    
+
+//     var borderLayer = [CALayer layer]
+//     borderLayer.frame = CGRectMake(0, 1, 348, 1)
+//     [borderLayer setBackgroundColor:CGColorCreateGenericRGB(220/255, 220/255, 220/255, 1.0)]
+//     [bottomActionsView setLayer:borderLayer];
+
+//     var yPosBottomElements = 45;
+
+//     var versionLabel = [[NSTextField alloc] initWithFrame:NSMakeRect(xPos, yPosBottomElements + 5, 266, 26)]
+//     [versionLabel setEditable:false]
+//     [versionLabel setBordered:false]
+//     [versionLabel setAlignment:0] 
+//     [versionLabel setFont:[NSFont systemFontOfSize:11]]
+//     [versionLabel setTextColor:[NSColor colorWithCalibratedRed:(93/255) green:(93/255) blue:(93/255) alpha:1]]
+//     [versionLabel setDrawsBackground:false]
+//     [versionLabel setStringValue:"OSX " + systemVersion + " Sketch " + sketchVersion + " Plugin " + pluginVersion]
+//     [[windowSendArtboards contentView] addSubview:versionLabel]
+
+
+//     // Buttons
+
+//     var sendButton = [[NSButton alloc] initWithFrame:NSMakeRect(353, yPosBottomElements, 76, 46)]
+//     var cancelButton = [[NSButton alloc] initWithFrame:NSMakeRect(283, yPosBottomElements, 76, 46)]
+//     var debugCheckbox = [[NSButton alloc] initWithFrame:NSMakeRect (420,195,50,25)]
+
+//     [debugCheckbox setButtonType:NSSwitchButton];
+//     [debugCheckbox setTitle:@""];
+//     if(utils.getDebugSetting(context) == 1){
+//         [debugCheckbox setState:NSOnState];
+//     } else {
+//         [debugCheckbox setState:NSOffState];
+//     }
+//     [debugCheckbox setCOSJSTargetFunction:function(sender) {
+
+//         var directory = errorLogging.getLogDirectory(context);
+//         errorLogging.removeFileOrFolder(directory + "main.txt")
+
+//         if ([sender state] == NSOnState) {
+//             utils.saveDebugSetting(1,context)
+//         } else {
+//             utils.saveDebugSetting(0,context)
+//         }
+
+//     }];
+//     [[windowSendArtboards contentView] addSubview:debugCheckbox]
+
+//     [sendButton setTitle:"Send"]
+//     [sendButton setBezelStyle:NSRoundedBezelStyle]
+//     [sendButton setCOSJSTargetFunction:function(sender) {
+
+//             var logs = errorLogging.fetchLog(context);
+
+//             var subject = @"Sketch Plugin Support";
+//             var body =[NSString stringWithFormat:@"Describe your bug here: \n\n\n\n\n My Logs:\n\n Plugin Version: %@ \n System Version: %@ \n Sketch Version: %@ \n %@", pluginVersion, systemVersion, sketchVersion, logs];
+//             var to = @"support@qordoba.com";
+//             var encodedSubject = [NSString stringWithFormat:@"SUBJECT=%@", [subject stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+//             var encodedBody = [NSString stringWithFormat:@"BODY=%@", [body stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+//             var encodedTo = [to stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+//             var encodedURLString = [NSString stringWithFormat:@"mailto:%@?%@&%@", encodedTo, encodedSubject, encodedBody];
+//             var mailtoURL = [NSURL URLWithString:encodedURLString];
+
+//             [[NSWorkspace sharedWorkspace] openURL:mailtoURL];
+
+//             [windowSendArtboards orderOut:nil]
+//             [app stopModal]
+//             [sendButton setCOSJSTargetFunction:undefined]
+//             [cancelButton setCOSJSTargetFunction:undefined]
+//             [debugCheckbox setCOSJSTargetFunction:undefined]
+//     }];
+//     [sendButton setAction:"callAction:"]
+//     [[windowSendArtboards contentView] addSubview:sendButton]
+
+
+//     [cancelButton setTitle:"Close"]
+//     [cancelButton setBezelStyle:NSRoundedBezelStyle]
+//     [cancelButton setCOSJSTargetFunction:function(sender) {
+//         [windowSendArtboards orderOut:nil]
+//         [app stopModal]
+//         [cancelButton setCOSJSTargetFunction:undefined]
+//         [debugCheckbox setCOSJSTargetFunction:undefined]
+//         [sendButton setCOSJSTargetFunction:undefined]
+//     }];
+//     [cancelButton setAction:"callAction:"]
+//     [[windowSendArtboards contentView] addSubview:cancelButton]
+
+//     [windowSendArtboards setDefaultButtonCell:[sendButton cell]];
+
+//     [app runModalForWindow:windowSendArtboards]
+// }
+
+
+// /**
+//  *
+//  * Api Calls
+//  * Helpers
+//  *
+// **/
+// function dealWithErrors(context,data){
+//         sketchLog(context,"Received an error from the server")
+//         var stringRead = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];    
+
+//         var alert = [[NSAlert alloc] init]
+//         [alert setMessageText:"Something went wrong..."]
+//         [alert setInformativeText:"Please ensure your email and password are correct and internet isn\'t down or a firewall (e.g. Little Snitch) is not blocking any connections to qordoba.com."]
+
+//         if(stringRead != nil && stringRead != ""){
+//                 [alert addButtonWithTitle:'Close']
+//                 [alert addButtonWithTitle:'Show more details']
+//         } else {
+//                 [alert addButtonWithTitle:'Close']
+//         }
+
+//         var responseCode = [alert runModal]
+//         sketchLog(context,"Return data " + stringRead)
+// }
+
+// function fireError(title,text){
+//         [app displayDialog:text withTitle:title]
+// }
+
+
+// var updatesChecker = {
+//     getNewestVersionNumber: function(context){
+//         sketchLog(context,"updatesChecker.getNewestVersionNumber()")
+
+//         var url = [NSURL URLWithString:"https://raw.githubusercontent.com/Qordobacode/qordoba-for-sketch/master/Qordoba.sketchplugin/Contents/Sketch/manifest.json"];
+
+//         var request=[NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30]
+//         [request setHTTPMethod:"GET"]
+
+//         var response = nil;
+//         var error = nil;
+//         sketchLog(context,"NSURLConnection updatesChecker.getNewestVersionNumber()")
+//         var data = [NSURLConnection sendSynchronousRequest:request returningResponse:response error:error];
+
+//         if (error == nil && data != nil)
+//         {       
+//           var errorJson;
+
+//             var res = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:errorJson]
+
+//             if(errorJson == nil){
+//             if(res.version){
+//                   return res.version
+//             }
+//             } else {
+//                 sketchLog(context,"NSURLConnection updatesChecker.getNewestVersionNumber() Convert to JSON failed")
+//                 return false
+//             }
+
+//         } 
+
+//         sketchLog(context,"updatesChecker.getNewestVersionNumber() failed")
+//         [app displayDialog:"Try again later..." withTitle:"Could not contact GitHub properly."]
+//         return false
+//     }
+// }
+
+// function fireUpdate(context, showNoUpdate) {
+//   var newestVersion = updatesChecker.getNewestVersionNumber(context)
+//   var pluginVersion = manifest.getPluginVersion(context)
+//   sketchLog(context,"Show Updates: " + showNoUpdate);
+//   var dateNow = [NSDate date];
+//   utils.setLastVersionChecked(dateNow,context);
+
+//   sketchLog(context,"newestVersion: (" + newestVersion + "),pluginVersion: (" + pluginVersion + ")");
+//   if (parseFloat(newestVersion) == parseFloat(pluginVersion) && showNoUpdate == true) {
+//     [app displayDialog:"Sketch " + newestVersion + " is currently the newest version available." withTitle:"You’re up-to-date!"]
+//   } else if(parseFloat(newestVersion) == parseFloat(pluginVersion)) {
+//         sketchLog(context,"Sketch " + newestVersion + " is currently the newest version available.");
+//   } else {
+//     var alert = [[NSAlert alloc] init]
+//     [alert setMessageText:"A new version "+newestVersion+" of Qordoba for Sketch is available."]
+//     [alert setInformativeText:"Download the new plugin on GitHub."]
+//     [alert addButtonWithTitle:'Close']
+//     [alert addButtonWithTitle:'Download the update']
+
+//     var responseCode = [alert runModal]
+//     if(responseCode == "1001"){
+//          var url = [NSURL URLWithString:@"https://github.com/Qordobacode/qordoba-for-sketch/releases/latest"];
+//           if( ![[NSWorkspace sharedWorkspace] openURL:url] ){
+//               sketchLog(context,"Failed to open url:" + [url description])
+//           } 
+//     }
+//   } 
+// }
 
 /***/ }),
 /* 32 */
 /***/ (function(module, exports) {
 
 module.exports = require("sketch/ui");
+
+/***/ }),
+/* 33 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(console, fetch) {Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+exports.loginWithUsernameAndPassword = undefined;
+
+var _utils = __webpack_require__(34);
+
+var _utils2 = _interopRequireDefault(_utils);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+// @import "files.js"
+// @import "framework-utils/MochaJSDelegate.js"
+
+// var rootAppUrl = "https://app.qordoba.com/api/"
+
+var loginWithUsernameAndPassword = exports.loginWithUsernameAndPassword = function loginWithUsernameAndPassword(email, password, context, browserWindow, webContents) {
+	return getTokenFromServer(email, password, context, browserWindow, webContents);
+};
+
+// /**
+//  *
+//  * Get the organization list of projects with target langueas for each one
+//  *
+// **/
+// function getProjectsArray(organizationId,context) {
+// 	var token = qordobaSDK.common.token
+
+// 	var url = [NSURL URLWithString:rootAppUrl + "organizations/"+organizationId+"/projects/by_type/7"];
+// 	var request=[NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60]
+// 	[request setHTTPMethod:"GET"]
+// 	[request setValue:"application/json" forHTTPHeaderField:"Content-Type"]
+// 	[request setValue:token forHTTPHeaderField:"X-AUTH-TOKEN"]
+
+// 	var response = nil;
+// 	var error = nil;
+// 	sketchLog(context,"NSURLConnection getProjectsArray()")
+// 	var data = [NSURLConnection sendSynchronousRequest:request returningResponse:response error:error];
+
+// 	if (error == nil && data != nil)
+// 	{	    
+// 	    var errorJson;
+// 		var res = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:errorJson]
+// 		  if(res == nil || res.projects == nil || res.errMessage !=nil){
+// 		  		utils.deleteActiveToken(context)
+// 		  		fireError("Your token is not valid anymore, please login again.","After you are logged in again please try again.")
+// 		  		return false
+// 		  } else {
+// 			  if(res.count() > 0){
+// 			   	var projects = [];
+// 			   	for (var i = 0; i < res.projects.count(); i++) {
+// 			   		var project = res.projects[i]
+// 			   			projects.push({
+// 			   				name: project.id+ " - " + project.name, 
+// 			   				id: project.id,
+// 			   				targetLanguages: project.target_languages
+// 			   			})
+// 			   	}
+// 				utils.saveOrganizationProjects(organizationId,projects)
+// 				log(projects)
+// 			   	return projects;
+// 			   } else {
+// 			   	var projects = [];
+// 			   	utils.saveOrganizationProjects(organizationId,projects)
+// 			   	return projects;
+// 			  }
+// 		}
+// 	} else {
+// 			dealWithErrors(context,data)
+// 	}
+// 	return false;		
+// }
+
+// /**
+//  *
+//  * Get the organization list of projects with target languages for each one
+//  *
+// **/
+// function getLanguagesArray(context) {
+// 	var langs = utils.getLanguages(context)
+// 	if(langs){
+// 		return langs;
+// 	}
+// 	var token = qordobaSDK.common.token
+// 	var url = [NSURL URLWithString:rootAppUrl + "languages"];
+// 	var request=[NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60]
+// 	[request setHTTPMethod:"GET"]
+// 	[request setValue:"application/json" forHTTPHeaderField:"Content-Type"]
+// 	[request setValue:token forHTTPHeaderField:"X-AUTH-TOKEN"]
+
+// 	var response = nil;
+// 	var error = nil;
+// 	var data = [NSURLConnection sendSynchronousRequest:request returningResponse:response error:error];
+
+// 	if (error == nil && data != nil)
+// 	{	    
+// 	    var errorJson;
+// 		var res = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:errorJson]
+// 		  if(res == nil || res.languages == nil || res.errMessage !=nil){
+// 		  		utils.deleteActiveToken(context)
+// 		  		fireError("Your token is not valid anymore, please login again.","After you are logged in again please try again.")
+// 		  		return false
+// 		  } else {
+// 			  if(res.count() > 0){
+// 			   	var languages = [];
+// 			   	for (var i = 0; i < res.languages.count(); i++) {
+// 			   		var language = res.languages[i]
+// 			   		languages.push({
+// 			   				id: language.id,
+// 							name: language.name, 
+// 			   				code: language.code,
+// 			   				direction: language.direction
+// 			   		})
+// 			   	}
+// 				utils.saveLanguages(context,languages)
+// 			   	return languages;
+// 			   } else {
+// 			   	var languages = [];
+// 			   	utils.saveLanguages(context,languages)
+// 			   	return languages;
+// 			  }
+// 		}
+// 	} else {
+// 			dealWithErrors(context,data)
+// 	}
+// 	return false;		
+// }
+
+// /**
+//  *
+//  * Get the Access token from server using email and password
+//  *
+// **/
+
+var getTokenFromServer = function getTokenFromServer(email, password, context, browserWindow, webContents) {
+	// 	sketchLog(context,"qordoba-api.getTokenFromServer()")
+	console.log('browserWindow:', browserWindow);
+	// var url = [NSURL URLWithString:  rootAppUrl + "login"];
+	// 	var request=[NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60]
+	// 	[request setHTTPMethod:"PUT"]
+	// 	[request setValue:"application/json" forHTTPHeaderField:"Content-Type"]
+	// 	[request setValue:"sketch" forHTTPHeaderField:"User-Agent"]
+
+	// 	var error = nil;    
+	// 	var parameters = {"username": email, "password": password, "remember":true};
+	// 	var postData = [NSJSONSerialization dataWithJSONObject:parameters options:NSUTF8StringEncoding error:error]
+	// 	[request setHTTPBody:postData];
+	// 	var response = nil;
+	// 	var error = nil;
+	// 	var data = [NSURLConnection sendSynchronousRequest:request returningResponse:response error:error];    
+	// 	if (error == nil && data != nil){	
+	// 		var res = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:nil]
+	// 		if(res == nil){
+	// 			dealWithErrors(context,data)
+	// 			return false;
+	// 		} else if(res.errMessage != nil){
+	// 			fireError("Error!", res.errMessage)
+	// 			return false;
+	// 		} else{
+	// 		  	var token = res.token
+	// 		  	var userName = res.loggedUser.name
+	// 		  	var userID = res.loggedUser.id
+	// 		  	var userEmail = res.loggedUser.email
+	// 		  	var organizations = res.loggedUser.organizations
+	// 		  	//Show Welcome Messages		
+	// 		  	if(token){
+	// 	  			utils.saveActiveTokenToComputer(context,token,userID,userName,userEmail)
+	// 	  			utils.saveUserOrganizations(context,organizations)
+	// 	  			fireError("Success!", "Welcome " + userName+ ". Let's get some artboards localized.")
+	// 	  			return true;
+	// 			} else if(res.errMessage){
+	// 				fireError("Error!", res.errMessage)
+	// 				return false;
+	// 			}else {
+	// 				dealWithErrors(context,data)
+	// 				return false;
+	// 			}
+	// 		}
+	// 	} else {
+	// 		dealWithErrors(context,data)
+	// 		return false;
+	// 	}
+	// 	return false;
+
+	fetch('https://app.qordoba.com/api/login', {
+		method: 'PUT',
+		body: JSON.stringify({
+			username: email,
+			password: password,
+			remember: true
+		}),
+		headers: {
+			'Content-Type': 'application/json',
+			'User-Agent': 'sketch'
+		}
+	}).then(function (res) {
+		if (res.status === 200) {
+			res.json().then(function (data) {
+				var token = data.token;
+				var userName = data.loggedUser.name;
+				var userID = data.loggedUser.id;
+				var userEmail = data.loggedUser.email;
+				var organizations = data.loggedUser.organizations;
+				_utils2['default'].saveActiveTokenToComputer(context, token, userID, userName, userEmail, webContents);
+
+				webContents.executeJavaScript('logInfoToRollbar("' + String(userName) + '", "Login successful")');
+				browserWindow.close();
+			});
+		} else {
+			webContents.executeJavaScript('logErrorToRollbar("' + String(username) + '", "Login unsuccessful")');
+		}
+	});
+};
+
+// /**
+//  *
+//  * upload original file to the server 
+//  *
+// **/
+// function postFile(context, path, organizationId, projectId, filename) {
+// 	var token = getActiveToken(organizationId,context)
+// 	if(!token) {
+// 		utils.fireError("Invalid Token", "Please make sure you have a valid login and API access.")
+// 		return false;
+// 	}
+
+// 	var doc = context.document
+// 	var task = NSTask.alloc().init()
+// 	task.setLaunchPath("/usr/bin/curl");
+// 	var args = NSArray.arrayWithArray(["-v",
+// 	 "POST", 
+// 	 "--header", "Content-Type: multipart/form-data", 
+// 	 "--header", "X-AUTH-TOKEN: " + token, 
+// 	 "--header", "user_key: " + token,
+// 	 	"-F",'file_names=[{"upload_id":"","file_name":"'+filename+'"}]',
+// 	 	"-F", "Content-Disposition: form-data; name=file; filename=" + filename + "; Content-Type=image/png;",
+// 	 	"-F", "file=@" + path, 
+// 	 	rootAppUrl+"projects/"+projectId+"/user_upload_files?smart-suggest=true&update=true"]);
+// 	log(args)
+// 	task.setArguments(args);
+// 	var outputPipe = [NSPipe pipe];
+// 	[task setStandardOutput:outputPipe];
+// 	task.launch();
+// 	var outputData = [[outputPipe fileHandleForReading] readDataToEndOfFile];
+// 	var classNameOfOuput = NSStringFromClass([outputData class]);
+// 	if(classNameOfOuput != "_NSZeroData"){
+// 		var errorJson;
+// 		var res = [NSJSONSerialization JSONObjectWithData:outputData options:NSJSONReadingMutableLeaves error:errorJson]
+// 		 if(errorJson == nil && res != null){
+// 		 	if(res.file_ids != nil){
+// 		 		var fileId = res.file_ids[0]
+// 		 		return {fileId: fileId}
+// 		 	} else if(res.errMessage != nil){
+// 		 		log("Error Message: " + res.errMessage)
+// 		 		utils.fireError("Error!",res.errMessage)
+// 		 		return false;
+// 		 	}
+// 		} else {
+// 			sketchLog(context, "JSON convert failed")
+// 		}
+// 		return false;
+// 	} else {
+// 		sketchLog(context, "Empty output")
+// 		return false;
+// 	}
+// }
+
+
+// /**
+//  *
+//  * upload original file to the server 
+//  *
+// **/
+// function postReference(context, screenshotPath, geometryPath, organizationId, projectId, fileId, filename) {
+// 	var token = getActiveToken(organizationId,context)
+// 	if(!token) {
+// 		utils.fireError("Invalid Token", "Please make sure you have a valid login and API access.")
+// 		return false;
+// 	}
+// 	var doc = context.document
+// 	var task = NSTask.alloc().init()
+// 	task.setLaunchPath("/usr/bin/curl");
+// 	var args = NSArray.arrayWithArray(["-v", 
+// 		"POST", 
+// 		"--header", "Content-Type: multipart/form-data", 
+// 		"--header", "X-AUTH-TOKEN: " + token, 
+// 		"--header", "user_key: " + token,
+// 			"-F",'file_names=[{"upload_id":"","file_name":"'+filename+'"}]', 
+// 			"-F", "Content-Disposition: form-data; name=screenshot; filename=" + filename + "; Content-Type=image/png;", 
+// 			"-F", "screenshot=@" + screenshotPath, 
+// 			"-F", "Content-Disposition: form-data; name=geometry; filename=" + filename + "; Content-Type=text/html;", 
+// 			"-F", "geometry=@" + geometryPath, 
+// 			rootAppUrl+"projects/"+projectId+"/pages/"+fileId+"/reference"]);
+// 	log('upload reference file')
+// 	log(args)
+// 	task.setArguments(args);
+// 	var outputPipe = [NSPipe pipe];
+// 	[task setStandardOutput:outputPipe];
+// 	task.launch();
+// 	var outputData = [[outputPipe fileHandleForReading] readDataToEndOfFile];
+// 	var classNameOfOuput = NSStringFromClass([outputData class]);
+// 	if(classNameOfOuput != "_NSZeroData"){
+// 		var errorJson;
+// 		var res = [NSJSONSerialization JSONObjectWithData:outputData options:NSJSONReadingMutableLeaves error:errorJson]
+// 		log(res)
+// 		 if(errorJson == nil && res != null){
+// 		 	/*if(res.file_ids != nil){
+// 		 		var fileId = res.file_ids[0]
+// 		 		return {fileId: fileId}
+// 		 	} else if(res.errMessage != nil){
+// 		 		log("Error Message: " + res.errMessage)
+// 		 		utils.fireError("Error!",res.errMessage)
+// 		 		return false;
+// 		 	}
+// 		 	*/
+// 		 	return true;
+// 		} else {
+// 			sketchLog(context, "JSON convert failed")
+// 		}
+// 		return false;
+// 	} else {
+// 		sketchLog(context, "Empty output")
+// 		return false;
+// 	}
+// }
+// /**
+//  *
+//  * download translated file from the server, json files only
+//  *
+// **/
+// function downloadFileNSUrlConnection(context, organizationId, projectId, languageId, fileId) {
+// 	var token = qordobaSDK.common.token
+// 	var url = [NSURL URLWithString:rootAppUrl + "projects/" + projectId + "/languages/"+ languageId + "/files/" + fileId];
+// 	var request=[NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60]
+// 	[request setHTTPMethod:"GET"]
+// 	[request setValue:"application/json" forHTTPHeaderField:"Content-Type"]
+// 	[request setValue:token forHTTPHeaderField:"X-AUTH-TOKEN"]
+
+// 	var tempPostData = [NSMutableData data]; 
+// 	var response = nil;
+// 	var error = nil;
+// 	var data = [NSURLConnection sendSynchronousRequest:request returningResponse:response error:error];
+// 	if (error == nil && data != nil)
+// 	{	
+// 		theResponseText = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+// 		jsonObject = fileHelper.csvToJson(theResponseText)
+// 		return jsonObject;
+// 	} else {
+// 		dealWithErrors(context,data)
+// 	}
+// 	return false;
+// }
+
+// /**
+//  *
+//  * download translated file from the server, json files only
+//  *
+// **/
+// function downloadFileByName(context, organizationId, projectId, languageId, file_name) {
+// 	var token = qordobaSDK.common.token
+// 	var url = [NSURL URLWithString:rootAppUrl + "projects/" + projectId + "/languages/"+ languageId +"/download_file" ];
+
+// 	var request=[NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60]
+// 	[request setHTTPMethod:"POST"]
+// 	[request setValue:"application/json" forHTTPHeaderField:"Content-Type"]
+// 	[request setValue:token forHTTPHeaderField:"X-AUTH-TOKEN"]
+
+// 	var parameters = {"file_name": file_name};
+// 	var postData = [NSJSONSerialization dataWithJSONObject:parameters options:NSUTF8StringEncoding error:error];
+// 	[request setHTTPBody:postData];
+
+// 	var tempPostData = [NSMutableData data]; 
+// 	var response = nil;
+// 	var error = nil;
+// 	var data = [NSURLConnection sendSynchronousRequest:request returningResponse:response error:error];
+// 	if (error == nil && data != nil)
+// 	{
+// 		var res = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:nil]
+// 		if(res!=nil && res.errMessage != nil){
+// 			fireError("Error!", res.errMessage)
+// 			return false;
+// 		}
+// 		var theResponseText = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+// 		var jsonObject = fileHelper.csvToJson(theResponseText)
+// 		return jsonObject;
+// 	} else {
+// 		dealWithErrors(context,data)
+// 		return false;
+// 	}
+// }
+
+// function downloadFileNSUrlConnectionAsync(context, organizationId, projectId, languageId, fileId, downloadCallback) {
+// 	var token = qordobaSDK.common.token
+// 	var url = [NSURL URLWithString:rootAppUrl + "projects/" + projectId + "/languages/"+ languageId + "/files/" + fileId];
+// 	var request=[NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60]
+// 	[request setHTTPMethod:"GET"]
+// 	[request setValue:"application/json" forHTTPHeaderField:"Content-Type"]
+// 	[request setValue:token forHTTPHeaderField:"X-AUTH-TOKEN"]
+// 	[request setValue:token forHTTPHeaderField:"user_key"]
+
+// 	COScript.currentCOScript().setShouldKeepAround_(true);
+// 	var delegate = new MochaJSDelegate(null);
+// 	delegate.setHandlerForSelector("connection:didReceiveData:", function(connection, data) {
+// 		theResponseText = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+// 		jsonObject = fileHelper.csvToJson(theResponseText)
+// 		downloadCallback(jsonObject)
+// 	});
+
+// 	delegate.setHandlerForSelector("connection:didFailWithError:", function(connection, error){
+// 		downloadCallback(error)
+// 	});
+
+// 	var conne = [NSURLConnection connectionWithRequest:request delegate:delegate.getClassInstance()];
+// 	[conne start];
+// }
+
+// /**
+//  *
+//  * Get User Status 
+//  *
+// **/
+// function getUserStatus(context) {
+// 		var doc = context.document
+// 		var token = qordobaSDK.common.token
+// 		var url = [NSURL URLWithString:rootAppUrl + "user/status"];
+//         var request=[NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60]
+// 		[request setHTTPMethod:"GET"]
+// 		[request setValue:"application/json" forHTTPHeaderField:"Content-Type"]
+// 		[request setValue:token forHTTPHeaderField:"X-AUTH-TOKEN"]
+
+// 		var error = nil;                     
+// 		var response = nil;
+// 		var data = [NSURLConnection sendSynchronousRequest:request returningResponse:response error:error];
+
+//         if (error == nil && data != nil){	
+// 				var res = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:nil]
+// 				if(res == nil || res.errMessage != nil){
+// 					return "free";
+// 				}else{
+// 				  	var userStatus = res.user_status
+// 				  	if(userStatus){
+// 							userStatus;
+// 						} else {
+// 							"free";
+// 						}
+// 				}
+// 		}
+// 		return "free";	
+// }
+
+
+// function getActiveToken(context) {
+//     var token = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba_token" + "_" + qordobaSDK.common.version];
+//     if (token) {
+//         var url = [NSURL URLWithString:rootAppUrl + "session"];
+//         var request=[NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:60]
+// 		[request setHTTPMethod:"GET"]
+// 		[request setValue:"application/json" forHTTPHeaderField:"Content-Type"]
+// 		[request setValue:token forHTTPHeaderField:"X-AUTH-TOKEN"]
+
+// 		var error = nil;                     
+// 		var response = nil;
+// 		var data = [NSURLConnection sendSynchronousRequest:request returningResponse:response error:error];
+//         if (error == nil && data != nil){	
+// 			var res = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableLeaves error:nil]
+// 			if(res == nil || res.errMessage != nil){
+// 				return false;
+// 			}else if(res.token){
+// 				return res.token;
+// 			} else {
+// 				return false;
+// 			}
+// 		}
+// 		return false;
+//     } else {
+//       return false;
+//     }
+// }
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(28)))
+
+/***/ }),
+/* 34 */
+/***/ (function(module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var utils = utils || {};
+utils = {
+  // "getPageId" : function(page){
+  //   var string = page.toString()
+  //   // var openRange = [string rangeOfString:@"("]
+  //   // var closeRange = [string rangeOfString:@")"]
+  //   var openRange = string.rangeOfString("(")
+  //   var closeRange = string.rangeOfString(")")
+  //   var length = closeRange.location - openRange.location -1
+  //   // return [[string substringFromIndex:NSMaxRange(openRange)] substringToIndex:length]
+  //   return string.substringFromIndex(NSMaxRange(openRange)).substringToIndex(length)
+  // },
+
+  // "isRetinaDisplay": function(){
+  //   return NSScreen.isOnRetinaScreen();
+  // },
+
+  // "escapedFileName": function(string){
+  //   // var notAllowedChars = [NSCharacterSet characterSetWithCharactersInString:@"\\<>=,!#$&'()*+/:;=?@[]%"];
+  //   // var cleanString = [[string componentsSeparatedByCharactersInSet:notAllowedChars] componentsJoinedByString:@""];
+  //   var notAllowedChars = NSCharacterSet.characterSetWithCharactersInString("\\<>=,!#$&'()*+/:;=?@[]%");
+  //   var cleanString = string.componentsSeparatedByCharactersInSet.notAllowedChars().componentsJoinedByString("");
+  //   return cleanString
+  // },
+
+  // "createLabel": function(text, rect) {
+  //   // var label = [[NSTextField alloc] initWithFrame:rect]
+  //   var label = NSTextField.alloc().initWithFrame(rect)
+  //   label.stringValue = text
+  //   label.editable = false
+  //   label.borderd = false
+  //   label.bezeled = false
+  //   label.setAlignment(1)
+  //   label.useSingleLineMode = true
+  //   label.drawsBackground = false
+  //   return label
+  // },
+
+  // "getNames" : function(objs){
+  //     var arr = []
+  //     for (i = 0; i < objs.length; ++i) {
+  //         arr.push(objs[i].name);
+  //     }
+  //     return arr;
+  //   },
+
+  // "getArrayNames" : function(objs){
+  //     var arr = []
+  //     for (i = 0; i < objs.length; ++i) {
+  //         arr.push(objs[i].name);
+  //     }
+  //     return arr;
+  //   },
+  // "getIndexOfArray": function(objs, name){
+  //   var index = 0;
+  //   for (i = 0; i < objs.length; ++i) {
+  //     if(name == objs[i]){
+  //       index = i;
+  //       return index;
+  //     }
+  //   }
+  //   return index;
+  // },
+  // "getIndexOf": function(objs, name){
+  //   var index = 0;
+  //   for (i = 0; i < objs.length; ++i) {
+  //     if(name == objs[i]){
+  //       index = i;
+  //       return index;
+  //     }
+  //   }
+  //   return index;
+  // },
+  "saveActiveTokenToComputer": function () {
+    function saveActiveTokenToComputer(context, token, userid, username, useremail, webContents) {
+      // [[NSUserDefaults standardUserDefaults] setObject:token forKey:"QUSER_qordoba_token" + "_" + qordobaSDK.common.version]
+      // [[NSUserDefaults standardUserDefaults] setObject:userid forKey:"QUSER_qordoba_user_id" + "_" + qordobaSDK.common.version]
+      // [[NSUserDefaults standardUserDefaults] setObject:username forKey:"QUSER_qordoba_user_name" + "_" + qordobaSDK.common.version]
+      // [[NSUserDefaults standardUserDefaults] setObject:useremail forKey:"QUSER_qordoba_user_email" + "_" + qordobaSDK.common.version]
+      // [[NSUserDefaults standardUserDefaults] synchronize]
+
+      // NSUserDefaults.standardUserDefaults(token, "QUSER_qordoba_token" + "_" + qordobaSDK.common.version)
+      // NSUserDefaults.standardUserDefaults(userid, "QUSER_qordoba_user_id" + "_" + qordobaSDK.common.version)
+      // NSUserDefaults.standardUserDefaults(username, "QUSER_qordoba_user_name" + "_" + qordobaSDK.common.version)
+      // NSUserDefaults.standardUserDefaults(useremail, "QUSER_qordoba_user_email" + "_" + qordobaSDK.common.version)
+      // NSUserDefaults.standardUserDefaults(synchronize)
+      var userDefaults = NSUserDefaults.standardUserDefaults();
+      userDefaults.setObject_forKey(token, 'QUSER_qordoba_token');
+      userDefaults.setObject_forKey(userid, 'QUSER_qordoba_user_id');
+      userDefaults.setObject_forKey(username, 'QUSER_qordoba_user_name');
+      userDefaults.setObject_forKey(useremail, 'QUSER_qordoba_user_email');
+      var storedToken = userDefaults.objectForKey('QUSER_qordoba_token');
+      webContents.executeJavaScript('logInfoToRollbar("' + String(useremail) + '", "Storing user\'s token on computer under key QUSER_qordoba_token.(src/utils.js)")');
+    }
+
+    return saveActiveTokenToComputer;
+  }()
+
+  // "getUserName": function(context) {
+  //   // var value = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba_user_name" + "_" + qordobaSDK.common.version];
+  //     var value = NSUserDefaults.standardUserDefaults("QUSER_qordoba_user_name" + "_" + qordobaSDK.common.version);
+  //   if (value) {
+  //     return value;
+  //   } else {
+  //     return false;
+  //   }
+  // },
+
+  // "getUserEmail": function(context) {
+  //   // var value = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba_user_email" + "_" + qordobaSDK.common.version];
+  //   var value = NSUserDefaults.standardUserDefaults("QUSER_qordoba_user_email" + "_" + qordobaSDK.common.version);
+  //   if (value) {
+  //     return value;
+  //   } else {
+  //     return false;
+  //   }
+  // },
+  // "getUserId": function(context) {
+  //   // var value = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba_user_id" + "_" + qordobaSDK.common.version];
+  //   var value = NSUserDefaults.standardUserDefaults("QUSER_qordoba_user_id" + "_" + qordobaSDK.common.version);
+  //   if (value) {
+  //     return value;
+  //   } else {
+  //     return false;
+  //   }
+  // },
+
+  // "deleteActiveToken": function(context) {
+  //   // [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"QUSER_qordoba_token" + "_" + qordobaSDK.common.version];
+  //   // [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"QUSER_qordoba_user_id" + "_" + qordobaSDK.common.version];
+  //   // [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"QUSER_qordoba_user_name" + "_" + qordobaSDK.common.version];
+  //   // [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"QUSER_qordoba_user_email" + "_" + qordobaSDK.common.version];
+  //   NSUserDefaults.standardUserDefaults("QUSER_qordoba_token" + "_" + qordobaSDK.common.version)
+  //   NSUserDefaults.standardUserDefaults("QUSER_qordoba_user_id" + "_" + qordobaSDK.common.version)
+  //   NSUserDefaults.standardUserDefaults("QUSER_qordoba_user_name" + "_" + qordobaSDK.common.version)
+  //   NSUserDefaults.standardUserDefaults("QUSER_qordoba_user_email" + "_" + qordobaSDK.common.version)
+  //   this.deleteAllKeys(context)
+  // },
+  // "saveUserOrganizations": function(context,organizations) {
+  //     // [[NSUserDefaults standardUserDefaults] setObject:organizations forKey:"QUSER_qordoba_user_organizations" + "_" + qordobaSDK.common.version]
+  //     // [[NSUserDefaults standardUserDefaults] synchronize]
+  //     NSUserDefaults.standardUserDefaults(organizations, "QUSER_qordoba_user_organizations" + "_" + qordobaSDK.common.version)
+  //     NSUserDefaults.standardUserDefaults(synchronize)
+  // },
+
+  // "getUserOrganizations": function(context) {
+  //   // var value = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba_user_organizations" + "_" + qordobaSDK.common.version];
+  //   var value = NSUserDefaults.standardUserDefaults("QUSER_qordoba_user_organizations" + "_" + qordobaSDK.common.version);
+  //   if (value) {
+  //     return value;
+  //   } else {
+  //     return false;
+  //   }
+  // },
+  // "fireError": function(title,text){
+  //   // [app displayDialog:text withTitle:title]
+  //   app.displayDialog(text, title)
+  // },
+  // "deleteAllKeys": function(context){
+  //   // var defaultsDictionary = [[NSUserDefaults standardUserDefaults] dictionaryRepresentation];
+  //   // var keys = [defaultsDictionary allKeys]
+  //   var defaultsDictionary = NSUserDefaults.standardUserDefaults(dictionaryRepresentation);
+  //   var keys = defaultsDictionary.allKeys();
+  //   for (i = 0; i < keys.count(); ++i) {
+  //       var key = keys[i]
+  //       if(key.hasPrefix("QUSER")){
+  //         // [[NSUserDefaults standardUserDefaults] removeObjectForKey:key];
+  //         NSUserDefaults.standardUserDefaults.removeObjectForKey(key);
+  //       }
+  //   }
+  //   // [[NSUserDefaults standardUserDefaults] synchronize];
+  //   NSUserDefaults.standardUserDefaults.synchronize();
+  // },
+  //   "getOrganization": function(context){
+  //     var object = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba connected organization" + "_" + qordobaSDK.common.version];
+  //     if (object) {
+  //       return object;
+  //     } else {
+  //       return false;
+  //     }
+  //   },
+
+  //   "saveOrganization": function(organization, context){
+  //     [[NSUserDefaults standardUserDefaults] setObject:organization forKey:"QUSER_qordoba connected organization" + "_" + qordobaSDK.common.version]
+  //     [[NSUserDefaults standardUserDefaults] synchronize]
+  //   },
+
+  //   "getProject": function(context){
+  //     var object = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba connected project" + "_" + qordobaSDK.common.version];
+  //     if (object) {
+  //       return object;
+  //     } else {
+  //       return false;
+  //     }
+  //   },
+
+  //   "saveProject": function(project, context){
+  //     [[NSUserDefaults standardUserDefaults] setObject:project forKey:"QUSER_qordoba connected project" + "_" + qordobaSDK.common.version]
+  //     [[NSUserDefaults standardUserDefaults] synchronize]
+  //   },
+
+  //   "getTargetLanguage": function(context){
+  //     var object = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba connected project target language" + "_" + qordobaSDK.common.version];
+  //     if (object) {
+  //       return object;
+  //     } else {
+  //       return false;
+  //     }
+  //   },
+
+  //   "saveTargetLanguage": function(language, context){
+  //     [[NSUserDefaults standardUserDefaults] setObject:language forKey:"QUSER_qordoba connected project target language" + "_" + qordobaSDK.common.version]
+  //     [[NSUserDefaults standardUserDefaults] synchronize]
+  //   },
+
+  //   "getOrganizationProjects": function(organizationId, context){
+  //     var object = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba organization id:"+ organizationId+": projects" + "_" + qordobaSDK.common.version];
+  //     if (object) {
+  //       return object;
+  //     } else {
+  //       return false;
+  //     }
+  //   },
+
+  //   "saveOrganizationProjects": function(organizationId, projects, context){
+  //     [[NSUserDefaults standardUserDefaults] setObject:projects forKey:"QUSER_qordoba organization id:"+ organizationId+": projects" + "_" + qordobaSDK.common.version]]
+  //     [[NSUserDefaults standardUserDefaults] synchronize]
+  //   },
+  //   "saveLanguages": function(context,languages){
+  //     [[NSUserDefaults standardUserDefaults] setObject:languages forKey:"QUSER_qordoba_languages" + "_" + qordobaSDK.common.version]]
+  //     [[NSUserDefaults standardUserDefaults] synchronize]
+  //   },
+  //   "getLanguages": function(context){
+  //     var object = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba_languages" + "_" + qordobaSDK.common.version];
+  //     if (object) {
+  //       return object;
+  //     } else {
+  //       return false;
+  //     }
+  //   },
+
+  //   "getOrganizations": function(context){
+  //     var object = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba_user_organizations" + "_" + qordobaSDK.common.version];
+  //     if (object) {
+  //       return object;
+  //     } else {
+  //       return false;
+  //     }
+  //   },
+
+  //   "saveOrganizations": function(organizations, context){
+  //      [[NSUserDefaults standardUserDefaults] setObject:organizations forKey:"QUSER_qordoba_user_organizations" + "_" + qordobaSDK.common.version]
+  //      [[NSUserDefaults standardUserDefaults] synchronize]
+  //     },
+
+  //     "saveFileIdForPage": function(projectId,documentName, page, fileId, context) {
+  //       var pageId = page.objectID()
+  //       [[NSUserDefaults standardUserDefaults] setObject:fileId forKey:"QUSER_qordoba_org_api_key_" + projectId +"_"+ documentName + "-" + pageId];
+  //       [[NSUserDefaults standardUserDefaults] synchronize]
+  //     },
+
+  //     "getFileIdForPage": function(projectId,documentName,page,context) {
+  //       var pageId = page.objectID()
+  //       var key = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba_org_api_key_" +projectId +"_"+ documentName + "-" + pageId];
+  //       if (key) {
+  //         return key;
+  //       } else {
+  //         return false;
+  //       }
+  //     },
+
+  //     "deleteFileIdForPage": function(projectId,documentName,page,context) {
+  //       var pageId = page.objectID()
+  //       [[NSUserDefaults standardUserDefaults] removeObjectForKey:"QUSER_qordoba_org_api_key_" +projectId +"_"+ documentName + "-" + pageId];
+  //     },
+
+  //     "addGeneratedPage": function(page,context){
+  //       var pages = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba_generated_pages"]];
+  //       if (!pages) {
+  //         pages =  [NSMutableArray array];
+  //       }
+  //       var pageId = page.objectID()
+  //       [pages addObject:pageId]
+  //       [[NSUserDefaults standardUserDefaults] setObject:pages forKey:"QUSER_qordoba_generated_pages"];
+  //       [[NSUserDefaults standardUserDefaults] synchronize]
+  //     },
+  //     "isGeneratedPage": function(page,context){
+  //       var pages = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba_generated_pages"]];
+  //       var pageId = page.objectID()
+  //       return [pages containsObject:pageId]
+  //     },
+  //     "getDebugSetting": function(context){
+  //     var debug = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_debug"]
+  //     if (debug) {
+  //       return debug
+  //     } else {
+  //       return 1
+  //       //return 0
+  //     }
+  //   },
+
+  //   "saveDebugSetting": function(debugValue,context){
+  //     [[NSUserDefaults standardUserDefaults] setObject:debugValue forKey:"QUSER_debug"]
+  //     [[NSUserDefaults standardUserDefaults] synchronize]
+  //   },
+
+  //   "getLastUsedProject": function(context){
+  //     var last = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba last used project" + "_" + qordobaSDK.common.version];
+  //     if (last) {
+  //       return last;
+  //     } else {
+  //       return false;
+  //     }
+  //   },
+
+  //   "saveLastUsedProject": function(projectId,context){
+  //     [[NSUserDefaults standardUserDefaults] setObject:projectId forKey:"QUSER_qordoba last used project" + "_" + qordobaSDK.common.version]
+  //     [[NSUserDefaults standardUserDefaults] synchronize]
+  //   },
+
+  //   "getLastVersionChecked": function(context){
+  //     var last = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba_last_version_checked"];
+  //     if (last) {
+  //       return last;
+  //     } else {
+  //       return [NSDate date];
+  //     }
+  //   },
+  //   "checkLastVersionChecked": function(context){
+  //     var last = this.getLastVersionChecked(context);
+  //     var dateNow = [NSDate date];
+  //     var secondsBetween = [dateNow timeIntervalSinceDate:last];
+  //     //if(secondsBetween > 100){
+  //     if(secondsBetween/86400 > 1){
+  //       return true;
+  //     }else {
+  //       return false;
+  //     }
+  //   },
+
+  //   "setLastVersionChecked": function(datetime,context){
+  //     [[NSUserDefaults standardUserDefaults] setObject:datetime forKey:"QUSER_qordoba_last_version_checked"]
+  //     [[NSUserDefaults standardUserDefaults] synchronize]
+  //   },
+
+  //   "getLastUsedOrganization": function(context){
+  //     var last = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba last used organization" + "_" + qordobaSDK.common.version];
+  //     if (last) {
+  //       return last;
+  //     } else {
+  //       return false;
+  //     }
+  //   },
+
+  //   "saveLastUsedOrganization": function(projectId,context){
+  //     [[NSUserDefaults standardUserDefaults] setObject:projectId forKey:"QUSER_qordoba last used organization" + "_" + qordobaSDK.common.version]
+  //     [[NSUserDefaults standardUserDefaults] synchronize]
+  //   },
+
+  //   "filterArray": function(myArray,searchTerm, property){
+  //     var len = myArray.length;
+  //     var newArray = []
+  //     for(var i = 0; i < len; i++) {
+  //           if (myArray[i][property].toLowerCase != searchTerm.toLowerCase){
+  //             newArray.push(myArray[i])
+  //           }
+  //       }
+  //       return newArray;
+  //   },
+  //   "findFirstInArray": function(myArray,searchTerm, property){
+  //     var len = myArray.length;
+  //     for(var i = 0; i < len; i++) {
+  //           if (myArray[i][property].toLowerCase === searchTerm.toLowerCase){
+  //             return myArray[i];
+  //           }
+  //     }
+  //       return false;
+  //   },
+
+  //   "arrayObjectIndexOf": function(myArray, searchTerm, property) {
+  //     var len = myArray.length;
+  //     for(var i = 0; i < len; i++) {
+  //           if (myArray[i][property] == searchTerm){
+  //             return i;
+  //           }
+  //       }
+  //       return -1;
+  //   },
+  //   "resetLanguageSettings": function(context){
+  //     [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"QUSER_qordoba_language_settings"];
+  //     [[NSUserDefaults standardUserDefaults] synchronize]
+  //   },
+  //   "getLanguageSettings": function(context){
+  //     var objs = [[NSUserDefaults standardUserDefaults] objectForKey:"QUSER_qordoba_language_settings"];
+  //     if (objs) {
+  //       objs = JSON.parse(objs)
+  //       return objs;
+  //     } else {
+  //       return JSON.parse("[]");
+  //     }
+  //   },
+  //   "getSettingForLanguage": function(context,language){
+  //     language = language + ""
+  //     var objs = this.getLanguageSettings(context)
+  //     if (objs) {
+  //       objs = objs.filter(function (el) {return (el.language.toLowerCase() === language.toLowerCase());});
+  //       if(objs.length>0){
+  //         return objs[0];
+  //       }
+  //     }
+  //     return false
+  //   },
+  //   "removeLanguageSetting": function(context,language){
+  //     settings = this.getLanguageSettings(context)
+  //     settings = settings.filter(function (el) {return (el.language !=language);});
+  //     this.saveLanguageSettings(settings,context)
+  //     return settings;
+  //   },
+  //   "addLanguageSetting": function(context,obj){
+  //     var settings = this.getLanguageSettings(context)
+  //     var index = this.arrayObjectIndexOf(settings,obj.language,"language")
+  //     if(index>=0){
+  //       settings[index] = obj
+  //     }else{
+  //       settings.push(obj)
+  //     }
+  //     this.saveLanguageSettings(settings,context)
+  //     return settings;
+  //   },
+  //   "saveLanguageSettings": function(languageSettings,context){
+  //     languageSettings = JSON.stringify(languageSettings)
+  //     [[NSUserDefaults standardUserDefaults] setObject:languageSettings forKey:"QUSER_qordoba_language_settings"]
+  //     [[NSUserDefaults standardUserDefaults] synchronize]
+  //   },
+  // "getFontOf": function(context,fontName) {
+  //     var doc = context.document
+  //     var fontList = [doc fontList];
+
+  //     //get index
+  //     var objs = [fontList allFonts]
+  //     var index = -1;
+  //     for (i = 0; i < objs.count(); ++i) {
+  //        if(objs[i].toLowerCase() === fontName.toLowerCase()){
+  //           index = i;
+  //        }
+  //     }
+  //     if(index >=0){
+  //       var font =  [fontList fontForFontAtIndex:index]
+  //       return font
+  //     }
+  //     return false;
+  //   },
+  //  "excludeSymbols": function(context){
+  //     var doc = context.document
+  //     var symbols = doc.documentData().layerSymbols().objects();
+  //       for(var j = 0; j < symbols.count(); j++){
+  //         var symbol = symbols[j];
+  //         var layers = symbol.value().layers()
+  //         for(var i = 0; i < layers.count(); i++){
+  //           var layer = layers[i];
+  //           if(layer.class() == MSTextLayer){
+  //             [layer setPrimitiveDontSynchroniseWithSymbol:true];
+  //           }else if(layer.class() == MSLayerGroup ){
+  //             this.exlcudeGroups(context,layer.layers())
+  //           }
+  //         }
+  //       }
+  //   },
+  // "exlcudeGroups": function(context,layers){
+  //     for(var i = 0; i< layers.count(); i++){
+  //       var layer = layers[i];
+  //       if(layer.class() == MSTextLayer){
+  //         [layer setPrimitiveDontSynchroniseWithSymbol:true];
+  //         log(layer.dontSynchroniseWithSymbol());
+  //       }else if(layer.class() == MSLayerGroup ){
+  //         this.exlcudeGroups(context,layer.layers())
+  //       }
+  //     }
+  //   }
+};
+
+var config = utils;
+exports['default'] = utils;
 
 /***/ })
 /******/ ]);
